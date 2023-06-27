@@ -1,0 +1,4 @@
+WINDOW_WIDTH: int = 1024
+WINDOW_HEIGHT: int = 768
+TPS: int = 128
+FPS: int = 165
