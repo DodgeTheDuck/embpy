@@ -1,18 +1,26 @@
 
 from typing import Self
-from geometry import Vertex
-from primitives import Primitive
-from vbo import VBO
+from gl.ibo import IBO
+from gl.texture import Texture
+from gl.vao import VAO
+
+# TODO:
+# - manage resources better; delete vert/index data after buffers created?
 
 
 class Mesh:
-    def __init__(self: Self, vertices: list[Vertex] | Primitive) -> None:
-        if isinstance(vertices, Primitive):
-            self.vertices: list[Vertex] = vertices.verts
-        elif isinstance(vertices, list[Vertex]):
-            self.vertices: list[Vertex] = vertices
+    def __init__(self: Self,
+                 vertices: list[float],
+                 normals: list[float],
+                 uvs: list[float],
+                 indices: list[int],
+                 texture: Texture) -> None:
 
-        self.vbo: VBO = VBO(self.vertices)
+        self.vertices: list[float] = vertices
+        self.normals: list[float] = normals
+        self.uvs: list[float] = uvs
+        self.indices = indices
+        self.texture = texture
 
-    def draw(self: Self) -> None:
-        self.vbo.draw()
+        self.vao = VAO(vertices, normals, self.uvs)
+        self.ibo: IBO = IBO(self.indices)

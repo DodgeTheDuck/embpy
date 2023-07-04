@@ -22,12 +22,16 @@ def init(root_state: AppState) -> None:
     root_state.init()
 
     _engine_timer = Timer()
-    _tick_interval = _engine_timer.set_interval(1.0 / config.TPS, _tick)
-    _draw_interval = _engine_timer.set_interval(1.0 / config.FPS, _draw)
+    _tick_interval = _engine_timer.set_interval(1.0 / config.TPS,
+                                                _tick,
+                                                "Tick")
+    _draw_interval = _engine_timer.set_interval(1.0 / config.FPS,
+                                                _draw,
+                                                "Draw")
 
 
 def run() -> None:
-    while pg.handle_window_events():
+    while pg.handle_window_events(_app_states[-1]):
         _engine_timer.update()
 
 

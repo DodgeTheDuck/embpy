@@ -1,6 +1,8 @@
 import pygame
+from app_state import AppState
+import input
 
-from pygl import Pygl
+from gl.pygl import Pygl
 
 _window_surface: pygame.surface.Surface = None
 _pygl: Pygl = None
@@ -24,11 +26,13 @@ def get_window_surface() -> pygame.surface.Surface:
     return _window_surface
 
 
-def handle_window_events() -> bool:
+def handle_window_events(app_state: AppState) -> bool:
     for event in pygame.event.get():
         match event.type:
             case pygame.QUIT:
                 return False
+        input.handle_event(event)
+        app_state.event(event)
     return True
 
 

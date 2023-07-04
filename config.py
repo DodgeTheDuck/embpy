@@ -1,4 +1,9 @@
-WINDOW_WIDTH: int = 1024
-WINDOW_HEIGHT: int = 768
+WINDOW_WIDTH: int = 1920
+WINDOW_HEIGHT: int = 1080
+ASPECT_RATIO: float = (WINDOW_WIDTH / WINDOW_HEIGHT)
+VIEW_NEAR: float = 0.1
+VIEW_FAR: float = 100
+FOV: float = 90
+
 TPS: int = 128
-FPS: int = 165
+FPS: int = 256

@@ -6,12 +6,14 @@ from typing import Callable, Self
 class CallbackInterval:
     def __init__(self: Self,
                  interval_time_s: float,
-                 callback: Callable) -> None:
+                 callback: Callable,
+                 name: str) -> None:
         self.interval_time_ns: int = interval_time_s * 1e+9
         self.callback: Callable = callback
         self.last_callback_ns: int = time.time_ns()
         self.calls = 0
         self.calls_per_second = 0
+        self.name = name
 
 
 class Timer:
@@ -36,6 +38,7 @@ class Timer:
         if self.second_counter >= 1.0:
             for interval in self.intervals:
                 interval.calls_per_second = interval.calls
+                print(f"{interval.name}: {interval.calls}")
                 interval.calls = 0
             self.second_counter = 0
 
@@ -48,7 +51,8 @@ class Timer:
 
     def set_interval(self: Self,
                      time_s: float,
-                     callback: Callable) -> CallbackInterval:
-        interval: CallbackInterval = CallbackInterval(time_s, callback)
+                     callback: Callable,
+                     name: str) -> CallbackInterval:
+        interval: CallbackInterval = CallbackInterval(time_s, callback, name)
         self.intervals.append(interval)
         return interval

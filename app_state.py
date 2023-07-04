@@ -2,6 +2,8 @@
 from abc import ABC, abstractmethod
 from typing import Self
 
+import pygame
+
 
 class AppState(ABC):
 
@@ -10,9 +12,13 @@ class AppState(ABC):
         pass
 
     @abstractmethod
-    def tick(self: Self, delta_ns: int) -> None:
+    def tick(self: Self, delta: int) -> None:
         pass
 
     @abstractmethod
-    def draw(self: Self, delta_ns: int) -> None:
+    def draw(self: Self, delta: int) -> None:
+        pass
+
+    @abstractmethod
+    def event(self: Self, event: pygame.Event) -> None:
         pass

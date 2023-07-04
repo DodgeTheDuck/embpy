@@ -25,8 +25,14 @@ class Vector2:
 
 
 class Vertex:
-    def __init__(self: Self, position: Vector3) -> None:
+    def __init__(self: Self,
+                 position: Vector3,
+                 normal: Vector3 = None) -> None:
         self.position: Vector3 = position
+        self.normal: Vector3 = normal
 
-    def pack(self: Self) -> list[float]:
+    def pack_pos(self: Self) -> list[float]:
         return [self.position.x, self.position.y, self.position.z]
+
+    def pack_normal(self: Self) -> list[float]:
+        return [self.normal.x, self.normal.y, self.normal.z]
