@@ -1,9 +1,10 @@
 from typing import Self
 import glm
-
+import OpenGL.GL as gl
 import pygame
 import input
 import config
+import pg
 
 
 class Camera:
@@ -28,7 +29,6 @@ class Camera:
         self.pitch -= y_offset
 
     def tick(self: Self, delta: float) -> None:
-
         keys: list[int] = pygame.key.get_pressed()
         if keys[pygame.K_w]:
             self.position.z += self.move_speed * delta
@@ -75,3 +75,6 @@ class Camera:
         self.transform = glm.lookAt(self.position,
                                     self.position + front,
                                     up)
+
+        # TODO: not have this part here
+        gl.glUniform3f(gl.glGetUniformLocation(pg.gl().get_program("scene"), "viewPos"), self.position.x, self.position.y, self.position.z)

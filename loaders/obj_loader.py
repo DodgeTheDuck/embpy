@@ -1,34 +1,68 @@
 
 import pywavefront
 from gl.texture import Texture
+from material import Material, TextureType
 from mesh import Mesh
 
 # TODO:
-# - probably roll my own obj loader
+# - roll my own .obj loader
 
 
-def load_obj(filename: str) -> Mesh:
+def load_obj(filename: str) -> list[Mesh]:
 
     scene = pywavefront.Wavefront(filename, collect_faces=True)
-    positions: list[float] = list[float]()
-    normals: list[float] = list[float]()
-    uvs: list[float] = list[float]()
-    indices: list[int] = list[int]()
-    texture: Texture = None
+    meshes = list[Mesh]()
 
     for mesh in scene.mesh_list:
         for material in mesh.materials:
-            location = filename.split("/")[0]
-            texture = Texture(location + "/" + material.texture.file_name)
-            for i in range(0, len(material.vertices), material.vertex_size):
-                indices.extend(range(i, i+material.vertex_size))
-                positions.append(material.vertices[i+5])
-                positions.append(material.vertices[i+6])
-                positions.append(material.vertices[i+7])
-                normals.append(material.vertices[i+2])
-                normals.append(material.vertices[i+3])
-                normals.append(material.vertices[i+4])
-                uvs.append(material.vertices[i])
-                uvs.append(material.vertices[i+1])
+            mesh_material: Material = Material()
+            positions: list[float] = list[float]()
+            normals: list[float] = list[float]()
+            uvs: list[float] = list[float]()
+            indices: list[int] = list[int]()
+            if material.texture is not None:
+                diffuse_path: str = material.texture.file_name
+                location = filename.split("/")[0]
+                mesh_material.set_texture(TextureType.diffuse,
+                                          Texture((location +
+                                                   "/" +
+                                                   diffuse_path)))
 
-    return Mesh(positions, normals, uvs, indices, texture)
+            indices.extend(range(0, len(material.vertices)))
+
+            if material.has_normals and material.has_uvs:
+                for i in range(0,
+                               len(material.vertices),
+                               material.vertex_size):
+                    positions.append(material.vertices[i+5])
+                    positions.append(material.vertices[i+6])
+                    positions.append(material.vertices[i+7])
+                    normals.append(material.vertices[i+2])
+                    normals.append(material.vertices[i+3])
+                    normals.append(material.vertices[i+4])
+                    uvs.append(material.vertices[i])
+                    uvs.append(material.vertices[i+1])
+                    mesh_material.col_diffuse.append(material.diffuse[0])
+                    mesh_material.col_diffuse.append(material.diffuse[1])
+                    mesh_material.col_diffuse.append(material.diffuse[2])
+            elif material.has_normals:
+                for i in range(0,
+                               len(material.vertices),
+                               material.vertex_size):
+                    positions.append(material.vertices[i+3])
+                    positions.append(material.vertices[i+4])
+                    positions.append(material.vertices[i+5])
+                    normals.append(material.vertices[i+0])
+                    normals.append(material.vertices[i+1])
+                    normals.append(material.vertices[i+2])
+                    mesh_material.col_diffuse.append(material.diffuse[0])
+                    mesh_material.col_diffuse.append(material.diffuse[1])
+                    mesh_material.col_diffuse.append(material.diffuse[2])
+
+            meshes.append(Mesh(positions,
+                               normals,
+                               uvs,
+                               indices,
+                               mesh_material))
+
+    return meshes

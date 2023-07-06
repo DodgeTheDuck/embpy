@@ -1,14 +1,43 @@
-#version 330
+#version 330 core
 out vec4 FragColor;
 
-in vec3 frag_pos;
-in vec3 frag_norm;
-in vec2 frag_uv;
+in VS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+    vec3 Albedo;
+} fs_in;
 
+uniform int hasTexture;
 uniform sampler2D tex;
+uniform vec3 viewPos;
+uniform bool blinn;
 
 void main()
-{
-    FragColor = texture(tex, frag_uv);
-    // FragColor = vec4(1 * frag_uv.x, 1 * frag_uv.y, 1, 1);
+{           
+
+    vec3 lightPos = vec3(0, 5, 0);
+    vec3 color;
+    if(hasTexture == 1) {
+        color = texture(tex, fs_in.TexCoords).rgb;
+    } else {
+        color = fs_in.Albedo;
+    }
+    // ambient
+    vec3 ambient = 0.05 * color;
+    // diffuse
+    vec3 lightDir = normalize(lightPos - fs_in.FragPos);
+    vec3 normal = normalize(fs_in.Normal);
+    float diff = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = diff * color;
+    // specular
+    vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = 0.0;
+ 
+    vec3 halfwayDir = normalize(lightDir + viewDir);  
+    spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);    
+
+    vec3 specular = vec3(0.0) * spec; // assuming bright white light color
+    FragColor = vec4(ambient + diffuse + specular, 1.0);
 }

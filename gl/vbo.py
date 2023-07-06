@@ -5,7 +5,8 @@ import OpenGL.GL as gl
 
 
 class VBO:
-    def __init__(self: Self, data: list[float], size: int, location: int) -> None:
+    def __init__(self: Self,
+                 data: list[float]) -> None:
 
         self.buffer = gl.glGenBuffers(1)
         self.n_verts = len(data)
@@ -15,7 +16,10 @@ class VBO:
         gl.glBufferData(gl.GL_ARRAY_BUFFER,
                         (c_float*len(data))(*data),
                         gl.GL_STATIC_DRAW)
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 
+    def setup_attributes(self: Self, location: int, size: int) -> None:
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.buffer)
         gl.glEnableVertexAttribArray(location)
         gl.glVertexAttribPointer(location,
                                  size,
@@ -23,3 +27,4 @@ class VBO:
                                  gl.GL_FLOAT,
                                  0,
                                  None)
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)

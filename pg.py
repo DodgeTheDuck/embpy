@@ -11,6 +11,11 @@ _pygl: Pygl = None
 def init_pygame(window_width: int, window_height: int) -> None:
     global _window_surface, _pygl
     pygame.init()
+    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 4)
+    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 6)
+    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_PROFILE_MASK,
+                                    pygame.GL_CONTEXT_PROFILE_CORE)
+
     _window_surface = pygame.display.set_mode([window_width, window_height],
                                               pygame.OPENGL | pygame.DOUBLEBUF,
                                               24)

@@ -5,6 +5,7 @@ from pyparsing import deque
 
 from gl.shader import Shader, ShaderType
 from gl.shader_program import ShaderProgram
+from gl.texture import Texture
 
 
 class Pygl:
@@ -13,12 +14,14 @@ class Pygl:
         self.model_stack = deque[glm.mat4]()
         self.view_stack = deque[glm.mat4]()
         self.proj_stack = deque[glm.mat4]()
+        self.empty_texture = Texture("./textures/empty_tex.bmp")
 
     def init_gl(self: Self, window_width: int, window_height: int) -> None:
         gl.glViewport(0, 0, window_width, window_height)
         gl.glClearColor(0.2, 0.5, 0.5, 1.0)
-        gl.glEnableClientState(gl.GL_VERTEX_ARRAY)
+        # gl.glEnableClientState(gl.GL_VERTEX_ARRAY)
         gl.glEnable(gl.GL_DEPTH_TEST)
+        # gl.glPolygonMode(gl.GL_FRONT_AND_BACK, gl.GL_LINE)
 
     def clear(self: Self) -> None:
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
@@ -52,11 +55,18 @@ class Pygl:
         m = self.model_stack[-1]
         v = self.view_stack[-1]
         p = self.proj_stack[-1]
-        mvp = p * v * m
-        gl.glUniformMatrix4fv(gl.glGetUniformLocation(program, "mvp"),
+        gl.glUniformMatrix4fv(gl.glGetUniformLocation(program, "m"),
                               1,
                               gl.GL_FALSE,
-                              glm.value_ptr(mvp))
+                              glm.value_ptr(m))
+        gl.glUniformMatrix4fv(gl.glGetUniformLocation(program, "v"),
+                              1,
+                              gl.GL_FALSE,
+                              glm.value_ptr(v))
+        gl.glUniformMatrix4fv(gl.glGetUniformLocation(program, "p"),
+                              1,
+                              gl.GL_FALSE,
+                              glm.value_ptr(p))
 
     def push_mat_model(self: Self, mat: glm.mat4) -> None:
         self.model_stack.append(mat)
@@ -75,3 +85,8 @@ class Pygl:
 
     def pop_mat_proj(self: Self) -> None:
         self.proj_stack.pop()
+
+    def bind_empty_texture(self: Self) -> None:
+        gl.glActiveTexture(gl.GL_TEXTURE0)
+        gl.glBindTexture(gl.GL_TEXTURE_2D,
+                         self.empty_texture.texture)

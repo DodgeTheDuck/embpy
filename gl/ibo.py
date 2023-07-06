@@ -13,5 +13,4 @@ class IBO:
         gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER,
                         (c_uint*len(indices))(*indices),
                         gl.GL_STATIC_DRAW)
-        gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0)
         pass
