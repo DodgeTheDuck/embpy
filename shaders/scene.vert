@@ -18,7 +18,7 @@ uniform mat4 m;
 
 void main()
 {
-    vs_out.FragPos = aPos;
+    vs_out.FragPos = (m * vec4(aPos, 1.0)).xyz;
     vs_out.Normal = aNormal;
     vs_out.TexCoords = aTexCoords;
     vs_out.Albedo = aAlbedo;

@@ -8,11 +8,15 @@ if TYPE_CHECKING:
 
 class Component:
 
-    def __init__(self: Self, owner: SceneObject) -> None:
+    def __init__(self: Self, owner: SceneObject, name: str) -> None:
         self.owner = owner
+        self.name = name
 
     def tick(self: Self, delta: float) -> None:
         pass
 
     def draw(self: Self) -> None:
+        pass
+
+    def gui(self: Self) -> None:
         pass

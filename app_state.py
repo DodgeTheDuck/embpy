@@ -20,5 +20,9 @@ class AppState(ABC):
         pass
 
     @abstractmethod
+    def gui(self: Self) -> None:
+        pass
+
+    @abstractmethod
     def event(self: Self, event: pygame.Event) -> None:
         pass

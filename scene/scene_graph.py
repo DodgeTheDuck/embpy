@@ -6,7 +6,7 @@ from scene.scene_object import SceneObject
 
 class SceneGraph:
     def __init__(self: Self) -> None:
-        self.root = SceneObject()
+        self.root = SceneObject("scene")
         pass
 
     def tick(self: Self, delta: float) -> None:

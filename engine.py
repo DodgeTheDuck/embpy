@@ -1,17 +1,14 @@
 
 from collections import deque
-import sys
-from typing import Self
-
-import pygame
-
+from console import Console
+import gui
 import config
 import pg
-from imgui.integrations.opengl import ProgrammablePipelineRenderer
-import imgui
 
 from app_state import AppState
 from interval_timer import CallbackInterval, Timer
+
+console: Console = None
 
 _app_states: deque[AppState] = deque[AppState]()
 _engine_timer: Timer = None
@@ -21,10 +18,14 @@ _impl = None
 
 
 def init(root_state: AppState) -> None:
-    global _engine_timer, _tick_interval, _draw_interval, _impl
+    global _engine_timer, _tick_interval, _draw_interval, _impl, console
+    console = Console()
+
+    console.write_line("initialising...")
+    console.write_line("init pygame")
     pg.init_pygame(config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
     _app_states.append(root_state)
-
+    console.write_line("init app")
     root_state.init()
 
     _engine_timer = Timer()
@@ -34,9 +35,9 @@ def init(root_state: AppState) -> None:
     _draw_interval = _engine_timer.set_interval(1.0 / config.FPS,
                                                 _draw,
                                                 "Draw")
-    imgui.create_context()
-    _impl = ProgrammablePipelineRenderer()
-    _impl.io.display_size = (config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
+    console.write_line("init GUI")
+    gui.init()
+    console.write_line("complete")
 
 
 def run() -> None:
@@ -53,23 +54,10 @@ def _draw(delta: int) -> None:
     pg.gl().clear()
     _app_states[-1].draw(delta)
 
-    imgui.new_frame()
-
-    if imgui.begin_main_menu_bar():
-        if imgui.begin_menu("File", True):
-
-            clicked_quit, selected_quit = imgui.menu_item(
-                "Quit", "Cmd+Q", False, True
-            )
-
-            if clicked_quit:
-                sys.exit(0)
-
-            imgui.end_menu()
-        imgui.end_main_menu_bar()
-
-    imgui.render()
-
-    _impl.render(imgui.get_draw_data())
+    gui.start_frame()
+    gui.menu()
+    console.gui()
+    _app_states[-1].gui()
+    gui.render()
 
     pg.swap_buffers()

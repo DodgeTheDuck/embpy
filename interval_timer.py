@@ -30,7 +30,7 @@ class Timer:
 
     def update(self: Self) -> None:
         now: int = time.time_ns()
-        delta_s: int = (now - self.time_last_update) / 1e+9
+        delta_s: int = (now - self.time_last_update) / 1e9
         self.time_last_update = now
 
         self.second_counter += delta_s

@@ -7,9 +7,10 @@ class SceneObject():
 
     T = TypeVar("T")
 
-    def __init__(self: Self) -> None:
+    def __init__(self: Self, name: str) -> None:
         self.components = list[Component]()
         self.children = list[SceneObject]()
+        self.name = name
         self.parent = None
 
     def init(self: Self) -> None:

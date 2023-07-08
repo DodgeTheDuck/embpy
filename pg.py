@@ -1,8 +1,8 @@
 import pygame
 from app_state import AppState
 import input
-
 from gl.pygl import Pygl
+import gui
 
 _window_surface: pygame.surface.Surface = None
 _pygl: Pygl = None
@@ -37,6 +37,7 @@ def handle_window_events(app_state: AppState) -> bool:
             case pygame.QUIT:
                 return False
         input.handle_event(event)
+        gui.handle_event(event)
         app_state.event(event)
     return True
 

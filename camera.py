@@ -1,3 +1,4 @@
+import math
 from typing import Self
 import glm
 import OpenGL.GL as gl
@@ -16,7 +17,7 @@ class Camera:
                                                     config.ASPECT_RATIO,
                                                     config.VIEW_NEAR,
                                                     config.VIEW_FAR)
-        self.position = glm.vec3(0, 0, 0)
+        self.position = glm.vec3(0, 5, 0)
         self.move_speed = 1
         self.sensitivity = 0.5
         self.yaw = 0
@@ -66,9 +67,9 @@ class Camera:
         front.z = glm.cos(pitch_rads) * glm.cos(yaw_rads)
 
         right = glm.vec3()
-        right.x = glm.sin(yaw_rads - 3.14/2)
+        right.x = glm.sin(yaw_rads - math.pi / 2)
         right.y = 0
-        right.z = glm.cos(yaw_rads - 3.14/2)
+        right.z = glm.cos(yaw_rads - math.pi / 2)
 
         up = glm.cross(right, front)
 
@@ -77,4 +78,8 @@ class Camera:
                                     up)
 
         # TODO: not have this part here
-        gl.glUniform3f(gl.glGetUniformLocation(pg.gl().get_program("scene"), "viewPos"), self.position.x, self.position.y, self.position.z)
+        gl.glUniform3f(gl.glGetUniformLocation(pg.gl().get_program("scene"),
+                                               "viewPos"),
+                       self.position.x,
+                       self.position.y,
+                       self.position.z)

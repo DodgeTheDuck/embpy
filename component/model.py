@@ -6,6 +6,7 @@ from component.component import Component
 from mesh import Mesh
 from scene.scene_object import SceneObject
 import OpenGL.GL as gl
+import imgui
 
 # TODO:
 # - handle material stuff better
@@ -14,7 +15,7 @@ import OpenGL.GL as gl
 class ModelComponent(Component):
     def __init__(self: Self, owner: SceneObject) -> None:
         self.meshes: list[Mesh]
-        super().__init__(owner)
+        super().__init__(owner, "Model")
         pass
 
     def set_meshes(self: Self, meshes: list[Mesh]) -> Self:
@@ -43,6 +44,8 @@ class ModelComponent(Component):
                     gl.glBindTexture(gl.GL_TEXTURE_2D,
                                      texture)
                 else:
+                    gl.glUniform1i(gl.glGetUniformLocation(program,
+                                                           "hasTexture"), 0)
                     pg.gl().bind_empty_texture()
 
                 gl.glDrawElements(gl.GL_TRIANGLES,
@@ -58,3 +61,8 @@ class ModelComponent(Component):
             pg.gl().pop_mat_model()
 
         return super().draw()
+
+    def gui(self: Self) -> None:
+        for index, mesh in enumerate(self.meshes):
+            imgui.text(f"\tmesh {index}")
+        return super().gui()
