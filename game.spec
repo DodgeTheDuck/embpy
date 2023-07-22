@@ -3,12 +3,17 @@
 
 block_cipher = None
 
+added_files = [
+    ("./models", "models"),
+    ("./shaders", "shaders"),
+    ("./textures", "textures")
+]
 
 a = Analysis(
-    ['bld\\game.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=added_files,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

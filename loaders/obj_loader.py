@@ -1,77 +1,98 @@
 
-import time
-import pywavefront
+
 from gl.texture import Texture
 from material import Material, TextureType
 from mesh import Mesh
-import engine
-
-# TODO:
-# - roll my own .obj loader
 
 
-def load_obj(filename: str) -> list[Mesh]:
-    engine.console.write_line(f"loading model '{filename}'...")
-    time_start = time.time_ns()
-    scene = pywavefront.Wavefront(filename, collect_faces=True)
-    time_after_load = time.time_ns()
-    engine.console.write_line(f"loading finished in {(time_after_load - time_start) / 1e6}ms")
-    engine.console.write_line(f"parsing model '{filename}'...")
-    meshes = list[Mesh]()
+def load_obj(file_path: str) -> Mesh:
+    meshes = []
+    vertices = []
+    normals = []
+    uvs = []
+    indices = []
+    material = None
 
-    for mesh in scene.mesh_list:
-        for material in mesh.materials:
-            mesh_material: Material = Material()
-            positions: list[float] = list[float]()
-            normals: list[float] = list[float]()
-            uvs: list[float] = list[float]()
-            indices: list[int] = list[int]()
-            if material.texture is not None:
-                diffuse_path: str = material.texture.file_name
-                location = filename.split("/")[0]
-                mesh_material.set_texture(TextureType.diffuse,
-                                          Texture((location
-                                                   + "/"
-                                                   + diffuse_path)))
+    with open(file_path, 'r') as file:
+        for line in file:
+            if line.startswith('v '):
+                vertex = [float(x) for x in line[2:].split()]
+                vertices.extend(vertex)
+            elif line.startswith('vn '):
+                normal = [float(x) for x in line[3:].split()]
+                normals.extend(normal)
+            elif line.startswith('vt '):
+                uv = [float(x) for x in line[3:].split()]
+                uvs.extend(uv)
+            elif line.startswith('f '):
+                face = [int(x.split('/')[0]) - 1 for x in line[2:].split()]
+                indices.extend(face)
+            elif line.startswith('mtllib '):
+                material_file = line[7:].strip()
+                material = parse_material(file_path.split("/")[-2] + "/" + material_file)
 
-            indices.extend(range(0, len(material.vertices)))
-
-            if material.has_normals and material.has_uvs:
-                for i in range(0,
-                               len(material.vertices),
-                               material.vertex_size):
-                    positions.append(material.vertices[i + 5])
-                    positions.append(material.vertices[i + 6])
-                    positions.append(material.vertices[i + 7])
-                    normals.append(material.vertices[i + 2])
-                    normals.append(material.vertices[i + 3])
-                    normals.append(material.vertices[i + 4])
-                    uvs.append(material.vertices[i])
-                    uvs.append(material.vertices[i + 1])
-                    mesh_material.col_diffuse.append(material.diffuse[0])
-                    mesh_material.col_diffuse.append(material.diffuse[1])
-                    mesh_material.col_diffuse.append(material.diffuse[2])
-            elif material.has_normals:
-                for i in range(0,
-                               len(material.vertices),
-                               material.vertex_size):
-                    positions.append(material.vertices[i + 3])
-                    positions.append(material.vertices[i + 4])
-                    positions.append(material.vertices[i + 5])
-                    normals.append(material.vertices[i + 0])
-                    normals.append(material.vertices[i + 1])
-                    normals.append(material.vertices[i + 2])
-                    mesh_material.col_diffuse.append(material.diffuse[0])
-                    mesh_material.col_diffuse.append(material.diffuse[1])
-                    mesh_material.col_diffuse.append(material.diffuse[2])
-
-            meshes.append(Mesh(positions,
-                               normals,
-                               uvs,
-                               indices,
-                               mesh_material))
-
-    time_taken = time.time_ns() - time_after_load
-    engine.console.write_line(f"parsing finished in {time_taken / 1e6}ms")
+        if material is not None:
+            meshes.append(Mesh(vertices, normals, uvs, indices, material))
 
     return meshes
+
+
+def parse_material(material_file: str) -> Material:
+    material = Material()
+    current_texture_type = None
+
+    with open(material_file, 'r') as file:
+        for line in file:
+            line = line.strip()
+            if not line:
+                continue
+
+            if line.startswith('newmtl '):
+                current_texture_type = None
+            elif line.startswith('map_Ka '):
+                texture_file = line[7:].strip()
+                texture = Texture(texture_file)
+                material.textures[TextureType.albedo] = texture
+                current_texture_type = TextureType.albedo
+            elif line.startswith('map_Kd '):
+                texture_file = line[7:].strip()
+                texture = Texture(texture_file)
+                material.textures[TextureType.diffuse] = texture
+                current_texture_type = TextureType.diffuse
+            elif line.startswith('map_Ks '):
+                texture_file = line[7:].strip()
+                texture = Texture(texture_file)
+                material.textures[TextureType.specular] = texture
+                current_texture_type = TextureType.specular
+            elif line.startswith('map_Ke '):
+                texture_file = line[7:].strip()
+                texture = Texture(texture_file)
+                material.textures[TextureType.emissive] = texture
+                current_texture_type = TextureType.emissive
+            elif line.startswith('map_bump ') or line.startswith('bump '):
+                texture_file = line[9:].strip()
+                texture = Texture(texture_file)
+                material.textures[TextureType.bump] = texture
+                current_texture_type = TextureType.bump
+            elif line.startswith('map_d '):
+                texture_file = line[6:].strip()
+                texture = Texture(texture_file)
+                material.textures[TextureType.alpha] = texture
+                current_texture_type = TextureType.alpha
+            elif line.startswith('map_disp '):
+                texture_file = line[9:].strip()
+                texture = Texture(texture_file)
+                material.textures[TextureType.displacement] = texture
+                current_texture_type = TextureType.displacement
+            elif line.startswith('map_Ns '):
+                texture_file = line[7:].strip()
+                texture = Texture(texture_file)
+                material.textures[TextureType.normal] = texture
+                current_texture_type = TextureType.normal
+            elif line.startswith('map_ '):
+                # Custom texture type
+                texture_file = line[5:].strip()
+                texture = Texture(texture_file)
+                material.textures[current_texture_type] = texture
+
+    return material

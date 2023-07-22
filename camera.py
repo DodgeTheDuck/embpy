@@ -18,7 +18,7 @@ class Camera:
                                                     config.VIEW_NEAR,
                                                     config.VIEW_FAR)
         self.position = glm.vec3(0, 5, 0)
-        self.move_speed = 1
+        self.move_speed = 50
         self.sensitivity = 0.5
         self.yaw = 0
         self.pitch = 0

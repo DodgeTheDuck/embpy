@@ -1,6 +1,9 @@
 
 from typing import Self
+
+from gl.buffer_data import BufferData
 from gl.vao import VAO
+from gl.vbo import VBO
 from material import Material
 
 # TODO:
@@ -9,16 +12,21 @@ from material import Material
 
 class Mesh:
     def __init__(self: Self,
-                 vertices: list[float],
-                 normals: list[float],
-                 uvs: list[float],
-                 indices: list[int],
+                 buffer_data: list[BufferData],
+                 n_indices: int,
+                 index_type: int,
                  material: Material) -> None:
-
-        self.vertices: list[float] = vertices
-        self.normals: list[float] = normals
-        self.uvs: list[float] = uvs
-        self.indices = indices
+        self.vao = vao = VAO()
+        self.n_indices = n_indices
+        self.index_type = index_type
         self.material = material
+        vao.bind()
 
-        self.vao = VAO(vertices, normals, uvs, indices, material.col_diffuse)
+        for data in buffer_data:
+            vbo = VBO(data.data, data.target)
+            vbo.bind()
+            if data.attributes:
+                for attribute in data.attributes:
+                    attribute.bind()
+
+        vao.unbind()

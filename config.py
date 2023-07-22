@@ -2,7 +2,7 @@ WINDOW_WIDTH: int = 1920
 WINDOW_HEIGHT: int = 1080
 ASPECT_RATIO: float = (WINDOW_WIDTH / WINDOW_HEIGHT)
 VIEW_NEAR: float = 0.1
-VIEW_FAR: float = 100
+VIEW_FAR: float = 1000
 FOV: float = 90
 
 TPS: int = 128

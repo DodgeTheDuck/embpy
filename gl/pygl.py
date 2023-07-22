@@ -5,7 +5,7 @@ from pyparsing import deque
 
 from gl.shader import Shader, ShaderType
 from gl.shader_program import ShaderProgram
-from gl.texture import Texture
+from gl.texture import Sampler, Texture
 
 
 class Pygl:
@@ -14,7 +14,18 @@ class Pygl:
         self.model_stack = deque[glm.mat4]()
         self.view_stack = deque[glm.mat4]()
         self.proj_stack = deque[glm.mat4]()
-        self.empty_texture = Texture("./textures/empty_tex.bmp")
+
+        self.model_mat_acc = glm.mat4(1.0)
+        self.model_view_acc = glm.mat4(1.0)
+        self.mode_proj_acc = glm.mat4(1.0)
+
+        empty_tex_sampler = Sampler()
+        empty_tex_sampler.tex_min_filter = gl.GL_NEAREST
+        empty_tex_sampler.tex_mag_filter = gl.GL_NEAREST
+        empty_tex_sampler.tex_wrap_s = gl.GL_REPEAT
+        empty_tex_sampler.tex_wrap_t = gl.GL_REPEAT
+        empty_tex_sampler.target = gl.GL_TEXTURE_2D
+        self.empty_texture = Texture("./textures/empty_tex.bmp", empty_tex_sampler)
 
     def init_gl(self: Self, window_width: int, window_height: int) -> None:
         gl.glViewport(0, 0, window_width, window_height)
@@ -39,6 +50,9 @@ class Pygl:
         self.shaders[prog_name] = shader_program
         return shader_program.program
 
+    def get_shader(self: Self, prog_name: str) -> ShaderProgram:
+        return self.shaders[prog_name]
+
     def get_program(self: Self, prog_name: str) -> int:
         return self.shaders[prog_name].program
 
@@ -51,10 +65,19 @@ class Pygl:
                               gl.GL_FALSE,
                               glm.value_ptr(mat))
 
+    def mult_mat_stack(self: Self, mat_stack: deque[glm.mat4]) -> glm.mat4:
+        result: glm.mat4 = None
+        for mat in mat_stack:
+            if result is None:
+                result = mat
+            else:
+                result *= mat
+        return result
+
     def apply_mvp(self: Self, program: int) -> None:
-        m = self.model_stack[-1]
-        v = self.view_stack[-1]
-        p = self.proj_stack[-1]
+        m = self.mult_mat_stack(self.model_stack)
+        v = self.mult_mat_stack(self.view_stack)
+        p = self.mult_mat_stack(self.proj_stack)
         gl.glUniformMatrix4fv(gl.glGetUniformLocation(program, "m"),
                               1,
                               gl.GL_FALSE,
@@ -69,7 +92,10 @@ class Pygl:
                               glm.value_ptr(p))
 
     def push_mat_model(self: Self, mat: glm.mat4) -> None:
-        self.model_stack.append(mat)
+        if len(self.model_stack) == 0:
+            self.model_stack.append(mat)
+        else:
+            self.model_stack.append(mat * self.model_stack[-1])
 
     def push_mat_view(self: Self, mat: glm.mat4) -> None:
         self.view_stack.append(mat)

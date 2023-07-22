@@ -53,8 +53,8 @@ def start_frame() -> None:
 
 
 def object_properties() -> None:
-    imgui.set_next_window_size(256, config.WINDOW_HEIGHT)
-    imgui.set_next_window_position(config.WINDOW_WIDTH - 256, 0)
+    imgui.set_next_window_size(400, config.WINDOW_HEIGHT)
+    imgui.set_next_window_position(config.WINDOW_WIDTH - 400, 0)
     imgui.begin(f"Properties: {_selected_obj.name if _selected_obj else 'None'}",
                 flags=imgui.WINDOW_NO_COLLAPSE
                 | imgui.WINDOW_ALWAYS_VERTICAL_SCROLLBAR)

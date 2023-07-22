@@ -23,6 +23,9 @@ class ShaderProgram:
             raise Exception(info)
         self.uni_mvp = gl.glGetUniformLocation(self.program, "mvp")
 
+        self.uni_tex_albedo = gl.glGetUniformLocation(self.program, "albedo")
+        self.uni_tex_met_rough = gl.glGetUniformLocation(self.program, "metallicRoughness")
+
     def set_mvp(self: Self, mvp: glm.mat4) -> None:
         gl.glUniformMatrix4fv(self.uni_mvp,
                               1,
