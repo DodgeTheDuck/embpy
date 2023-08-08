@@ -15,7 +15,6 @@ from core.camera import Camera
 from component.model_component import ModelComponent
 from component.transform_component import TransformComponent
 from loaders.gltf_loader import GltfLoader
-from gfx.mesh import Mesh
 from core.node_graph import NodeGraph
 from scene.scene_object import SceneObject, SceneObjectType
 import OpenGL.GL as gl
@@ -68,8 +67,6 @@ class AppStateDev(AppState):
         return super().tick(delta)
 
     def draw_geometry(self: Self) -> None:
-
-
         pg.gl().push_mat_view(self.camera.transform)
         pg.gl().push_mat_proj(self.camera.projection)
         engine.scene.draw_geometry()
@@ -85,8 +82,8 @@ class AppStateDev(AppState):
         pg.gl().pop_mat_view()
         return super().draw_lighting()
 
+    # NOTE: temporary, until i sort out how to handle cameras in engine
     def draw_camera(self: Self) -> None:
-
         gl.glUniform3f(pg.gl().top_pipeline_stage().draw_shader.get_uniform_loc("viewPos"),
                        self.camera.position.x,
                        self.camera.position.y,

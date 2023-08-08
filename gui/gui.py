@@ -5,7 +5,6 @@ import imgui
 import config
 import pygame as pg
 
-import config
 import core.pg as engine_pg
 
 from scene.scene_graph import SceneGraph

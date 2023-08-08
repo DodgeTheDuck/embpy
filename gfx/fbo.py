@@ -1,8 +1,10 @@
 
-from enum import Enum
 from typing import Self
 import OpenGL.GL as gl
 import config
+
+# TODO:
+#     Make this customisable, don't need all these attachments for every FBO
 
 
 class FBO:

@@ -4,16 +4,12 @@ from typing import Self
 from component.component import Component
 from component.transform_component import TransformComponent
 from core.node_graph import Node, NodeGraph
-from gfx.material import Material
 from gfx.mesh import Mesh
 from gfx.mesh_node import MeshNode
 from gfx.shader_program import ShaderProgram
 from scene.scene_object import SceneObject
-from gfx.mesh import Mesh
-from scene.scene_object import SceneObject
 import OpenGL.GL as gl
 import core.pg as pg
-import imgui
 
 
 class LightComponent(Component):

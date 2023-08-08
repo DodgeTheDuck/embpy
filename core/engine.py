@@ -4,7 +4,6 @@ from debug.console import Console
 import gui.gui as gui
 import config
 import core.pg as pg
-import OpenGL.GL as gl
 
 from core.app_state import AppState
 from core.interval_timer import CallbackInterval, Timer

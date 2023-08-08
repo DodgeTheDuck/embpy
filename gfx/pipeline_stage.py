@@ -4,7 +4,6 @@ import OpenGL.GL as gl
 from gfx.fbo import FBO
 from gfx.shader_program import ShaderProgram
 from loaders.gltf_loader import GltfLoader
-import imgui
 
 
 class PipelineStage:
