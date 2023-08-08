@@ -1,8 +1,8 @@
 
 
-from gl.texture import Texture
-from material import Material, TextureType
-from mesh import Mesh
+from gfx.texture import Texture
+from gfx.material import Material, TextureType
+from gfx.mesh import Mesh
 
 
 def load_obj(file_path: str) -> Mesh:

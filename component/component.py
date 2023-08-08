@@ -15,7 +15,10 @@ class Component:
     def tick(self: Self, delta: float) -> None:
         pass
 
-    def draw(self: Self) -> None:
+    def draw_pass_geometry(self: Self) -> None:
+        pass
+
+    def draw_pass_lighting(self: Self) -> None:
         pass
 
     def gui(self: Self) -> None:

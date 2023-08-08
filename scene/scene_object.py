@@ -1,17 +1,25 @@
+from enum import Enum
 from typing import Self, TypeVar
 
 from component.component import Component
+
+
+class SceneObjectType(Enum):
+    none = 0
+    entity = 1
+    light = 2
 
 
 class SceneObject():
 
     T = TypeVar("T")
 
-    def __init__(self: Self, name: str) -> None:
+    def __init__(self: Self, name: str, type: SceneObjectType) -> None:
         self.components = list[Component]()
         self.children = list[SceneObject]()
         self.name = name
         self.parent = None
+        self.type = type
 
     def init(self: Self) -> None:
         pass
@@ -22,11 +30,17 @@ class SceneObject():
         for child in self.children:
             child.tick(delta)
 
-    def draw(self: Self, delta: int) -> None:
+    def draw_pass_geometry(self: Self) -> None:
         for component in self.components:
-            component.draw()
+            component.draw_pass_geometry()
         for child in self.children:
-            child.draw(delta)
+            child.draw_pass_geometry()
+
+    def draw_pass_lighting(self: Self) -> None:
+        for component in self.components:
+            component.draw_pass_lighting()
+        for child in self.children:
+            child.draw_pass_lighting()
 
     def get_component(self: Self, type: T) -> T:
         for component in self.components:

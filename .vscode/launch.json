@@ -2,11 +2,34 @@
     "version": "0.0.1",
     "configurations": [
         {
-            "name": "Python: Launch Main",
+            "name": "engine",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
+            "preLaunchTask": "Build app",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "shader_compiler",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/shader_compiler.py",
+            "args": ["shaders/scene.frag", "shaders/scene.vert"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "app_builder",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/app_builder.py",            
+            "console": "integratedTerminal"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Build and run App",
+            "configurations": ["app_builder", "engine"],
+            
         }
     ]
 }

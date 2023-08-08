@@ -3,17 +3,11 @@
 
 block_cipher = None
 
-added_files = [
-    ("./models", "models"),
-    ("./shaders", "shaders"),
-    ("./textures", "textures")
-]
-
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=added_files,
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

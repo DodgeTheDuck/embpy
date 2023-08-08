@@ -5,7 +5,7 @@ from component.component import Component
 from scene.scene_object import SceneObject
 import imgui
 
-from transform import Transform
+from gfx.transform import Transform
 
 
 class TransformComponent(Component):
@@ -21,7 +21,7 @@ class TransformComponent(Component):
 
         # TODO: make widget for vec3/quats etc
 
-        if imgui.collapsing_header("Position"):
+        if imgui.collapsing_header("Position")[0]:
             is_changed_x, value_x = imgui.input_float("x##1", position.x, step=0.01)
             is_changed_y, value_y = imgui.input_float("y##1", position.y, step=0.01)
             is_changed_z, value_z = imgui.input_float("z##1", position.z, step=0.01)
@@ -29,7 +29,7 @@ class TransformComponent(Component):
             if is_changed_y: position.y = value_y
             if is_changed_z: position.z = value_z
 
-        if imgui.collapsing_header("Orientation"):
+        if imgui.collapsing_header("Orientation")[0]:
             is_changed_x, value_x = imgui.input_float("x##2", rotation.x, step=0.01)
             is_changed_y, value_y = imgui.input_float("y##2", rotation.y, step=0.01)
             is_changed_z, value_z = imgui.input_float("z##2", rotation.z, step=0.01)
@@ -37,7 +37,7 @@ class TransformComponent(Component):
             if is_changed_y: rotation.y = value_y
             if is_changed_z: rotation.z = value_z
 
-        if imgui.collapsing_header("Scale"):
+        if imgui.collapsing_header("Scale")[0]:
             is_changed_x, value_x = imgui.input_float("x##3", scale.x, step=0.01)
             is_changed_y, value_y = imgui.input_float("y##3", scale.y, step=0.01)
             is_changed_z, value_z = imgui.input_float("z##3", scale.z, step=0.01)

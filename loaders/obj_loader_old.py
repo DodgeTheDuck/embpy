@@ -1,10 +1,10 @@
 
 import time
 import pywavefront
-from gl.texture import Texture
-from material import Material, TextureType
-from mesh import Mesh
-import engine
+from gfx.texture import Texture
+from gfx.material import Material, TextureType
+from gfx.mesh import Mesh
+import core.engine as engine
 
 # TODO:
 # - roll my own .obj loader

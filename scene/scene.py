@@ -12,5 +12,8 @@ class Scene:
     def tick(self: Self, delta: float) -> None:
         self.graph.tick(delta)
 
-    def draw(self: Self, delta: float) -> None:
-        self.graph.draw(delta)
+    def draw_geometry(self: Self) -> None:
+        self.graph.draw_geometry()
+
+    def draw_lighting(self: Self) -> None:
+        self.graph.draw_lighting()
