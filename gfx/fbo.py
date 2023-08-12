@@ -41,6 +41,13 @@ class FBO:
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST)
         gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT3, gl.GL_TEXTURE_2D, tex_met_rough, 0)
 
+        tex_depth = gl.glGenTextures(1)
+        gl.glBindTexture(gl.GL_TEXTURE_2D, tex_depth)
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_DEPTH_COMPONENT32F, config.WINDOW_WIDTH, config.WINDOW_HEIGHT, 0, gl.GL_DEPTH_COMPONENT, gl.GL_FLOAT, None)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST)
+        gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_DEPTH_ATTACHMENT, gl.GL_TEXTURE_2D, tex_depth, 0)
+
         gl.glBindTexture(gl.GL_TEXTURE_2D, 0)
         gl.glDrawBuffers([gl.GL_COLOR_ATTACHMENT0, gl.GL_COLOR_ATTACHMENT1, gl.GL_COLOR_ATTACHMENT2, gl.GL_COLOR_ATTACHMENT3])
 
@@ -48,12 +55,13 @@ class FBO:
         self.textures.append(tex_normal)
         self.textures.append(tex_albedo)
         self.textures.append(tex_met_rough)
+        self.textures.append(tex_depth)
 
-        rbo = gl.glGenRenderbuffers(1)
-        gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, rbo)
-        gl.glRenderbufferStorage(gl.GL_RENDERBUFFER, gl.GL_DEPTH24_STENCIL8, config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
-        gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, 0)
-        gl.glFramebufferRenderbuffer(gl.GL_FRAMEBUFFER, gl.GL_DEPTH_STENCIL_ATTACHMENT, gl.GL_RENDERBUFFER, rbo)
+        # rbo = gl.glGenRenderbuffers(1)
+        # gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, rbo)
+        # gl.glRenderbufferStorage(gl.GL_RENDERBUFFER, gl.GL_DEPTH24_STENCIL8, config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
+        # gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, 0)
+        # gl.glFramebufferRenderbuffer(gl.GL_FRAMEBUFFER, gl.GL_DEPTH_STENCIL_ATTACHMENT, gl.GL_RENDERBUFFER, rbo)
 
         if not gl.glCheckFramebufferStatus(gl.GL_FRAMEBUFFER) == gl.GL_FRAMEBUFFER_COMPLETE:
             raise Exception("framebuffer failed")

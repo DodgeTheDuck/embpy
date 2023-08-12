@@ -1,5 +1,8 @@
 
+from enum import Enum
 from typing import Self
+
+from glm import vec3
 
 from component.component import Component
 from component.transform_component import TransformComponent
@@ -12,10 +15,36 @@ import OpenGL.GL as gl
 import core.pg as pg
 
 
+class LightType(Enum):
+    none = 0
+    point = 1
+    directional = 2
+
+
 class LightComponent(Component):
     def __init__(self: Self, owner: SceneObject) -> None:
         self.volume = NodeGraph[list[Mesh]]()
+        self.color = vec3(1, 1, 1)
+        self.intensity = 1
+        self.type = LightType.none
+        self.direction = vec3(0, 0, 0)
         super().__init__(owner, "Light")
+
+    def set_color(self: Self, color: vec3) -> Self:
+        self.color = color
+        return self
+
+    def set_intensity(self: Self, intensity: float) -> Self:
+        self.intensity = intensity
+        return self
+
+    def set_type(self: Self, type: LightType) -> Self:
+        self.type = type
+        return self
+
+    def set_direction(self: Self, direction: vec3) -> Self:
+        self.direction = direction
+        return self
 
     def set_volume_mesh(self: Self, mesh_tree: NodeGraph[list[Mesh]]) -> Self:
         self.volume = mesh_tree
@@ -30,10 +59,17 @@ class LightComponent(Component):
     def draw_pass_lighting(self: Self) -> None:
         transform = self.owner.get_component(TransformComponent)
         if transform is not None:
-            scene_shader = pg.gl().top_pipeline_stage().draw_shader
+            gl.glCullFace(gl.GL_FRONT)
+            scene_shader = pg.gl().get_active_pipeline_stage().draw_shader
+            gl.glUniform3f(scene_shader.get_uniform_loc("LightPos"), transform.transform.position.x, transform.transform.position.y, transform.transform.position.z)
+            gl.glUniform3f(scene_shader.get_uniform_loc("LightColor"), self.color.x, self.color.y, self.color.z)
+            gl.glUniform3f(scene_shader.get_uniform_loc("LightDir"), self.direction.x, self.direction.y, self.direction.z)
+            gl.glUniform1f(scene_shader.get_uniform_loc("LightIntensity"), self.intensity)
+            gl.glUniform1i(scene_shader.get_uniform_loc("LightType"), self.type.value)
             pg.gl().push_mat_model(transform.transform.as_mat4())
             self._draw_node(self.volume.root, scene_shader)
             pg.gl().pop_mat_model()
+            gl.glCullFace(gl.GL_BACK)
 
         return super().draw_pass_lighting()
 

@@ -6,9 +6,12 @@ import glm
 from typing import Self
 
 import pygame
-from component.light_component import LightComponent
+from component.light_component import LightComponent, LightType
+from gfx.deffered_pbr_pipeline import DefferedPbrPipeline
 from gfx.mesh_node import MeshNode
 import gui.gui as gui
+
+import config
 
 from core.app_state import AppState
 from core.camera import Camera
@@ -30,6 +33,8 @@ class AppStateDev(AppState):
 
         # set up test model
 
+        pg.gl().set_pipeline(DefferedPbrPipeline())
+
         loader: GltfLoader = GltfLoader("models/gltf/roman_armour/armour.glb")
         armour_mesh: NodeGraph[MeshNode] = loader.load()
 
@@ -43,21 +48,33 @@ class AppStateDev(AppState):
 
         armour_obj.add_component(mesh_c).add_component(trans_c)
 
-        # set up light
+        # set up point light
 
         loader: GltfLoader = GltfLoader("models/gltf/light_volumes/point_light.glb")
         light_volume: NodeGraph[MeshNode] = loader.load()
 
         light_obj = SceneObject("test light", SceneObjectType.light)
         light_c = LightComponent(light_obj)
-        light_c.set_volume_mesh(light_volume)
+        light_c.set_volume_mesh(light_volume).set_color(glm.vec3(1, 0, 0)).set_intensity(3000).set_type(LightType.point)
 
         light_trans_c = TransformComponent(light_obj)
-        light_trans_c.transform.scale = glm.vec3(100, 100, 100)
+        light_trans_c.transform.scale = glm.vec3(500, 500, 500)
 
         light_obj.add_component(light_c).add_component(light_trans_c)
 
-        engine.scene.graph.root.add_child(armour_obj).add_child(light_obj)
+        # set up dir light
+
+        loader: GltfLoader = GltfLoader("models/gltf/plane/plane.glb")
+        light_dir_volume: NodeGraph[MeshNode] = loader.load()
+
+        light_dir_obj = SceneObject("sun", SceneObjectType.light)
+        light_dir_c = LightComponent(light_dir_obj)
+        light_dir_c.set_volume_mesh(light_dir_volume).set_color(glm.vec3(1, 1, 1)).set_intensity(3000).set_type(LightType.directional).set_direction(glm.vec3(0, -1, 0))
+        light_dir_trans_c = TransformComponent(light_dir_obj)
+        light_dir_trans_c.transform.scale = glm.vec3(config.WINDOW_WIDTH, config.WINDOW_HEIGHT, 100)
+        light_dir_obj.add_component(light_dir_c).add_component(light_dir_trans_c)
+
+        engine.scene.graph.root.add_child(armour_obj).add_child(light_obj)  # .add_child(light_dir_obj)
 
         self.camera: Camera = Camera()
 
@@ -84,7 +101,7 @@ class AppStateDev(AppState):
 
     # NOTE: temporary, until i sort out how to handle cameras in engine
     def draw_camera(self: Self) -> None:
-        gl.glUniform3f(pg.gl().top_pipeline_stage().draw_shader.get_uniform_loc("viewPos"),
+        gl.glUniform3f(pg.gl().get_active_pipeline_stage().draw_shader.get_uniform_loc("viewPos"),
                        self.camera.position.x,
                        self.camera.position.y,
                        self.camera.position.z)

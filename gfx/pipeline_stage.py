@@ -17,7 +17,6 @@ class PipelineStage:
         self.fbo = FBO()
 
     def bind(self: Self) -> None:
-        gl.glUseProgram(self.draw_shader.program)
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.fbo.buffer)
 
     def bind_textures(self: Self, shader: ShaderProgram) -> None:

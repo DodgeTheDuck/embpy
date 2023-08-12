@@ -4,10 +4,12 @@ from debug.console import Console
 import gui.gui as gui
 import config
 import core.pg as pg
+import OpenGL.GL as gl
 
 from core.app_state import AppState
 from core.interval_timer import CallbackInterval, Timer
 from scene.scene import Scene
+from scene.scene_object import SceneObjectType
 
 console: Console = None
 scene: Scene = None
@@ -55,25 +57,31 @@ def _tick(delta: int) -> None:
 
 def _draw(delta: int) -> None:
 
-    pg.gl().push_pipeline_stage("geometry")
+    pg.gl().bind_pipeline_stage("geometry")
     pg.gl().clear_color(0, 0, 0)
     pg.gl().clear()
+    pg.gl().bind_active_pipeline_stage_shader()
     _app_states[-1].draw_geometry()
-    pg.gl().pop_pipeline_stage()
 
-    pg.gl().push_pipeline_stage("light_pass")
+    pg.gl().bind_pipeline_stage("light_pass")
     pg.gl().clear_color(0, 0, 0)
     pg.gl().clear()
+    pg.gl().bind_active_pipeline_stage_shader()
+    _app_states[-1].draw_camera()  # NOTE: temporary until i work out how to handle cameras better
+    pg.gl().pipeline.bind_textures("geometry", pg.gl().get_active_pipeline_stage().draw_shader)
     _app_states[-1].draw_lighting()
-    pg.gl().pop_pipeline_stage()
 
-    pg.gl().push_pipeline_stage("shading")
-    _app_states[-1].draw_camera()
-    pg.gl().pipeline.bind_textures("geometry", pg.gl().pipeline.stages["shading"].draw_shader)
-    pg.gl().pipeline.draw_stage("shading")
-    pg.gl().bind_default_framebuffer()
-    pg.gl().pipeline.blit_stage("shading")
-    pg.gl().pop_pipeline_stage()
+    pg.gl().bind_pipeline_stage("shading")
+    pg.gl().bind_active_pipeline_stage_shader()
+    pg.gl().pipeline.blit_stage("light_pass")
+
+    # pg.gl().bind_pipeline_stage("shading")
+    # pg.gl().bind_active_pipeline_stage_shader()
+    # _app_states[-1].draw_camera()
+    # pg.gl().pipeline.bind_textures("geometry", pg.gl().pipeline.stages["shading"].draw_shader)
+    # pg.gl().pipeline.draw_stage("shading")
+    # pg.gl().bind_default_framebuffer()
+    # pg.gl().pipeline.blit_stage("shading")
 
     gui.start_frame()
     gui.menu()

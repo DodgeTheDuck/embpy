@@ -30,7 +30,7 @@ class ModelComponent(Component):
     def draw_pass_geometry(self: Self) -> None:
         transform = self.owner.get_component(TransformComponent)
         if transform is not None:
-            scene_shader = pg.gl().top_pipeline_stage().draw_shader
+            scene_shader = pg.gl().get_active_pipeline_stage().draw_shader
             pg.gl().push_mat_model(transform.transform.as_mat4())
 
             gl.glUniform1i(scene_shader.get_uniform_loc("texAlbedo"), 0)
