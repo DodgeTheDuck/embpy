@@ -1,13 +1,16 @@
+from component.light_component import LightComponent
 from component.transform_component import TransformComponent
+from gfx.material import Material
 from gfx.material_properties import MaterialProperties, TextureType
 from gfx.mesh_node import MeshNode
 from core.node_graph import Node, NodeGraph
 import core.pg as pg
 from typing import Self
 from component.component import Component
-from scene.scene_object import SceneObject
+from scene.scene_object import SceneObject, SceneObjectType
 import OpenGL.GL as gl
 import imgui
+import core.engine as engine
 
 # TODO:
 # - handle material stuff better
@@ -26,7 +29,7 @@ class ModelComponent(Component):
     def tick(self: Self, delta: float) -> None:
         return super().tick(delta)
 
-    def draw_pass_geometry(self: Self) -> None:
+    def draw_pass(self: Self, pass_index: int) -> None:
         transform: TransformComponent = self.owner.get_component(TransformComponent)
         if transform is not None:
 
@@ -37,7 +40,7 @@ class ModelComponent(Component):
 
             pg.gl().pop_mat_model()
 
-        return super().draw_pass_geometry()
+        return super().draw_pass(pass_index)
 
     def _draw_node(self: Self, node: Node[MeshNode]) -> None:
 
@@ -48,6 +51,10 @@ class ModelComponent(Component):
             mat_properties, shader = mesh.material.properties, mesh.material.shader
             # apply material shader
             shader.use()
+            lights = engine.scene.get_from_type(SceneObjectType.LIGHT)
+            for index, light_obj in enumerate(lights):
+                light = light_obj.get_component(LightComponent)
+                light.apply_light(shader, index)
             # send current mvp state to shader
             pg.gl().apply_mvp(shader.program)
             # bind mesh VAO
@@ -80,19 +87,20 @@ class ModelComponent(Component):
         # pop node transform
         pg.gl().pop_mat_model()
 
-    def gui(self: Self) -> None:
-        if imgui.collapsing_header("Meshes")[0]:
+    def draw_gui(self: Self) -> None:
+        if imgui.collapsing_header("Nodes")[0]:
             self._draw_node_gui(self.mesh_tree.root)
         if imgui.collapsing_header("Materials")[0]:
-            mats: list[MaterialProperties] = []
+            mats: list[Material] = []
             self._get_materials(self.mesh_tree.root, mats)
             for mat in mats:
-                imgui.text_ansi(mat.name)
-        return super().gui()
+                mat.draw_gui()
+
+        return super().draw_gui()
 
     def _get_materials(self: Self, node: Node[MeshNode], materials: list[MaterialProperties]) -> None:
         for mesh in node.obj.meshes:
-            materials.append(mesh.material_properties)
+            materials.append(mesh.material)
         for child in node.children:
             self._get_materials(child, materials)
 

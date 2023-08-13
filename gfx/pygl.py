@@ -5,6 +5,7 @@ from pyparsing import deque
 from gfx.pipeline.pipeline import Pipeline
 from gfx.pipeline.pipeline_stage import PipelineStage
 from gfx.renderer_setup.renderer_setup import RendererSetup
+from gfx.shader_program import ShaderProgram
 
 
 class Pygl:
@@ -89,8 +90,15 @@ class Pygl:
     def use_program(self: Self, program: int) -> None:
         gl.glUseProgram(program)
 
-    def uni_mat4(self: Self, program: int, var: str, mat: glm.mat4) -> None:
-        gl.glUniformMatrix4fv(gl.glGetUniformLocation(program, var),
+    def uni_mat4(self: Self, program: int, name: str, mat: glm.mat4) -> None:
+        gl.glUniformMatrix4fv(gl.glGetUniformLocation(program, name),
                               1,
                               gl.GL_FALSE,
                               glm.value_ptr(mat))
+
+    def uni_vec3(self: Self, shader: ShaderProgram, name: str, vec: glm.vec3) -> None:
+        # TODO: add support for structs/arrays in shader compiler
+        gl.glUniform3f(gl.glGetUniformLocation(shader.program, name), vec.x, vec.y, vec.z)
+
+    def uni_float1(self: Self, shader: ShaderProgram, name: str, fl: float) -> None:
+        gl.glUniform1f(gl.glGetUniformLocation(shader.program, name), fl)

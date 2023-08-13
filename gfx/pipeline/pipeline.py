@@ -33,5 +33,9 @@ class Pipeline:
         imgui.end()
 
     @abstractmethod
+    def begin(self: Self) -> None:
+        pass
+
+    @abstractmethod
     def end(self: Self) -> None:
         pass

@@ -5,9 +5,9 @@ from component.component import Component
 
 
 class SceneObjectType(Enum):
-    none = 0
-    entity = 1
-    light = 2
+    NONE = 0
+    ENTITY = 1
+    LIGHT = 2
 
 
 class SceneObject():
@@ -30,11 +30,11 @@ class SceneObject():
         for child in self.children:
             child.tick(delta)
 
-    def draw_pass_geometry(self: Self) -> None:
+    def draw_pass(self: Self, pass_index: int) -> None:
         for component in self.components:
-            component.draw_pass_geometry()
+            component.draw_pass(pass_index)
         for child in self.children:
-            child.draw_pass_geometry()
+            child.draw_pass(pass_index)
 
     def draw_pass_lighting(self: Self) -> None:
         for component in self.components:

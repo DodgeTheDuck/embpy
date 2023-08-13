@@ -3,14 +3,14 @@ import OpenGL.GL as gl
 from gfx.attachment import Attachment, AttachmentType
 from gfx.fbo import FBO
 from loaders.gltf_loader import GltfLoader
-import asset.asset_manager as asset_manager
+import core.asset.asset_manager as asset_manager
 import imgui
 import config
 
 
 class PipelineStage:
     def __init__(self: Self, name: str) -> None:
-        loader = GltfLoader("models/gltf/plane/plane.glb")
+        loader = GltfLoader("assets/models/rendering/plane/plane.glb")
         meshes = loader.load()
         self.mesh = meshes.root.obj.meshes[0]
         self.name = name

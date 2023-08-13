@@ -13,7 +13,7 @@ class TransformComponent(Component):
         self.transform: Transform = Transform()
         super().__init__(owner, "Transform")
 
-    def gui(self: Self) -> None:
+    def draw_gui(self: Self) -> None:
 
         position = self.transform.position
         rotation = self.transform.orientation
@@ -45,4 +45,4 @@ class TransformComponent(Component):
             if is_changed_y: scale.y = value_y
             if is_changed_z: scale.z = value_z
 
-        return super().gui()
+        return super().draw_gui()

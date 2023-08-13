@@ -1,24 +1,32 @@
 
-from collections import deque
-from asset.asset_shader import AssetShader
-from debug.console import Console
-import gui.gui as gui
-import config
-import core.pg as pg
-import asset.asset_manager as asset_manager
+"""
+ Main engine instance.
 
+ PURPOSE: Handles majority of lifetime of application.
+"""
+
+from collections import deque
+from core.asset.asset_shader import AssetShader
+from debug.console import Console
 from core.app_state import AppState
 from core.interval_timer import CallbackInterval, Timer
 from scene.scene import Scene
+import core.asset.asset_manager as asset_manager
+import gui.gui as gui
+import config
+import core.pg as pg
+
+# VARS: sub system
 
 console: Console = None
 scene: Scene = None
+
+# VARS: private
 
 _app_states: deque[AppState] = deque[AppState]()
 _engine_timer: Timer = None
 _tick_interval: CallbackInterval = None
 _draw_interval: CallbackInterval = None
-_impl = None
 
 
 def init(root_state: AppState) -> None:
@@ -28,7 +36,7 @@ def init(root_state: AppState) -> None:
     :param root_state: Bootstrapping app state.
     """
 
-    global _engine_timer, _tick_interval, _draw_interval, _impl, console, scene
+    global _engine_timer, _tick_interval, _draw_interval, console, scene
 
     # create sub systems
     console = Console()
@@ -102,13 +110,14 @@ def _draw(delta: int) -> None:
     # finalise pipeline
     pg.gl().get_active_pipeline().end()
 
+    # render GUI
     gui.start_frame()
     gui.menu()
-    gui.pipeline()
     console.draw_gui()
     pg.gl().get_active_pipeline().draw_gui()
     _app_states[-1].draw_gui()
     asset_manager.draw_gui()
     gui.render()
 
+    # display current frame
     pg.swap_buffers()

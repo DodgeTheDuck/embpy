@@ -2,7 +2,7 @@
 from copy import deepcopy
 from typing import TypeVar
 import imgui
-from asset.asset import Asset
+from core.asset.asset import Asset
 
 
 T = TypeVar("T")

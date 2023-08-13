@@ -61,7 +61,7 @@ def object_properties() -> None:
     if _selected_obj is not None:
         for component in _selected_obj.components:
             imgui.text(component.name)
-            component.gui()
+            component.draw_gui()
 
     imgui.end()
 
@@ -80,18 +80,6 @@ def scene_graph(graph: SceneGraph) -> SceneObject:
     imgui.begin("Scene Graph")
     _traverse_graph_node(graph.root)
     imgui.end()
-
-
-def pipeline() -> None:
-    # imgui.begin("Pipeline")
-    # for stage in engine_pg.gl().pipeline.stages.values():
-    #     if imgui.collapsing_header(stage.name)[0]:
-    #         for tex in stage.fbo.textures:
-    #             imgui.image(tex, 128 * config.ASPECT_RATIO, 128, (1, 1), (0, 0))
-    #         pass
-
-    # imgui.end()
-    pass
 
 
 def menu() -> None:

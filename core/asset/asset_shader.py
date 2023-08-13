@@ -1,6 +1,6 @@
 
 from typing import Self
-from asset.asset import Asset, AssetType
+from core.asset.asset import Asset, AssetType
 from loaders.shader_loader import ShaderLoader
 
 

@@ -11,8 +11,6 @@ from gfx.pipeline.basic_shading_pipeline import BasicShadingPipeline
 from gfx.mesh_node import MeshNode
 import gui.gui as gui
 
-import config
-
 from core.app_state import AppState
 from core.camera import Camera
 from component.model_component import ModelComponent
@@ -34,7 +32,7 @@ class AppStateDev(AppState):
         loader: GltfLoader = GltfLoader("assets/models/roman_armour/armour.glb")
         armour_mesh: NodeGraph[MeshNode] = loader.load()
 
-        armour_obj = SceneObject("test object", SceneObjectType.entity)
+        armour_obj = SceneObject("test object", SceneObjectType.ENTITY)
         mesh_c = ModelComponent(armour_obj)
         mesh_c.set_mesh_tree(armour_mesh)
 
@@ -44,33 +42,29 @@ class AppStateDev(AppState):
 
         armour_obj.add_component(mesh_c).add_component(trans_c)
 
-        # set up point light
+        # set up point light 1
 
-        loader: GltfLoader = GltfLoader("models/gltf/light_volumes/point_light.glb")
-        light_volume: NodeGraph[MeshNode] = loader.load()
-
-        light_obj = SceneObject("test light", SceneObjectType.light)
+        light_obj = SceneObject("test light 1", SceneObjectType.LIGHT)
         light_c = LightComponent(light_obj)
-        light_c.set_volume_mesh(light_volume).set_color(glm.vec3(1, 0, 0)).set_intensity(3000).set_type(LightType.point)
+        light_c.set_color(glm.vec3(1, 1, 1)).set_intensity(3000).set_attenuation(5).set_type(LightType.point)
 
         light_trans_c = TransformComponent(light_obj)
-        light_trans_c.transform.scale = glm.vec3(500, 500, 500)
+        light_trans_c.transform.position = glm.vec3(0, 50, -50)
 
         light_obj.add_component(light_c).add_component(light_trans_c)
 
-        # set up dir light
+        # set up point light 2
 
-        loader: GltfLoader = GltfLoader("models/gltf/plane/plane.glb")
-        light_dir_volume: NodeGraph[MeshNode] = loader.load()
+        light_obj_2 = SceneObject("test light 2", SceneObjectType.LIGHT)
+        light_c_2 = LightComponent(light_obj_2)
+        light_c_2.set_color(glm.vec3(1, 0, 0)).set_intensity(3000).set_attenuation(5).set_type(LightType.point)
 
-        light_dir_obj = SceneObject("sun", SceneObjectType.light)
-        light_dir_c = LightComponent(light_dir_obj)
-        light_dir_c.set_volume_mesh(light_dir_volume).set_color(glm.vec3(1, 1, 1)).set_intensity(3000).set_type(LightType.directional).set_direction(glm.vec3(0, -1, 0))
-        light_dir_trans_c = TransformComponent(light_dir_obj)
-        light_dir_trans_c.transform.scale = glm.vec3(config.WINDOW_WIDTH, config.WINDOW_HEIGHT, 100)
-        light_dir_obj.add_component(light_dir_c).add_component(light_dir_trans_c)
+        light_trans_c_2 = TransformComponent(light_obj_2)
+        light_trans_c_2.transform.position = glm.vec3(50, 50, -50)
 
-        engine.scene.graph.root.add_child(armour_obj).add_child(light_obj)  # .add_child(light_dir_obj)
+        light_obj_2.add_component(light_c_2).add_component(light_trans_c_2)
+
+        engine.scene.graph.root.add_child(armour_obj).add_child(light_obj).add_child(light_obj_2)
 
         self.camera: Camera = Camera()
 
@@ -83,7 +77,7 @@ class AppStateDev(AppState):
         if pass_index == BasicShadingPipeline.Stage.RENDER.value:
             pg.gl().push_mat_view(self.camera.transform)
             pg.gl().push_mat_proj(self.camera.projection)
-            engine.scene.draw_geometry()
+            engine.scene.draw_pass(pass_index)
             pg.gl().pop_mat_proj
             pg.gl().pop_mat_view()
             pass

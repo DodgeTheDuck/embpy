@@ -13,8 +13,8 @@ class Scene:
     def tick(self: Self, delta: float) -> None:
         self.graph.tick(delta)
 
-    def draw_geometry(self: Self) -> None:
-        self.graph.draw_geometry()
+    def draw_pass(self: Self, pass_index: int) -> None:
+        self.graph.draw_pass(pass_index)
 
     def draw_lighting(self: Self) -> None:
         self.graph.draw_lighting()
@@ -23,6 +23,8 @@ class Scene:
         return self._get_from_type_recursive(self.graph.root, type, [])
 
     def _get_from_type_recursive(self: Self, obj: SceneObject, type: SceneObjectType, result: list[SceneObject]) -> SceneObject:
+        if obj.type == type:
+            result.append(obj)
         for child in obj.children:
             if child.type == type:
                 result.append(child)

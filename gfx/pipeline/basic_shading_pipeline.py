@@ -7,6 +7,8 @@ from gfx.attachment import Attachment, AttachmentType
 from gfx.pipeline.pipeline import Pipeline
 from gfx.pipeline.pipeline_stage import PipelineStage
 import OpenGL.GL as gl
+import core.engine as engine
+from scene.scene_object import SceneObjectType
 
 
 class BasicShadingPipeline(Pipeline):
@@ -39,6 +41,9 @@ class BasicShadingPipeline(Pipeline):
         stage_render.unbind()
 
         self.add_stage(stage_render)
+
+    def begin(self: Self) -> None:
+        return super().begin()
 
     def end(self: Self) -> None:
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)

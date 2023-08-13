@@ -1,18 +1,17 @@
 
 from enum import Enum
+from lib2to3.pgen2 import pgen
 from typing import Self
-
 from glm import vec3
-
+import glm
 from component.component import Component
 from component.transform_component import TransformComponent
-from core.node_graph import Node, NodeGraph
+from core.node_graph import NodeGraph
 from gfx.mesh import Mesh
-from gfx.mesh_node import MeshNode
 from gfx.shader_program import ShaderProgram
 from scene.scene_object import SceneObject
-import OpenGL.GL as gl
 import core.pg as pg
+import imgui
 
 
 class LightType(Enum):
@@ -24,13 +23,14 @@ class LightType(Enum):
 class LightComponent(Component):
     def __init__(self: Self, owner: SceneObject) -> None:
         self.volume = NodeGraph[list[Mesh]]()
-        self.color = vec3(1, 1, 1)
-        self.intensity = 1
+        self.color = glm.vec3(1, 1, 1)
+        self.intensity = 1.0
         self.type = LightType.none
-        self.direction = vec3(0, 0, 0)
+        self.attenuation = 1.0
+        self.direction = glm.vec3(0, 0, 0)
         super().__init__(owner, "Light")
 
-    def set_color(self: Self, color: vec3) -> Self:
+    def set_color(self: Self, color: glm.vec3) -> Self:
         self.color = color
         return self
 
@@ -38,11 +38,15 @@ class LightComponent(Component):
         self.intensity = intensity
         return self
 
+    def set_attenuation(self: Self, attenuation: float) -> Self:
+        self.attenuation = attenuation
+        return self
+
     def set_type(self: Self, type: LightType) -> Self:
         self.type = type
         return self
 
-    def set_direction(self: Self, direction: vec3) -> Self:
+    def set_direction(self: Self, direction: glm.vec3) -> Self:
         self.direction = direction
         return self
 
@@ -50,47 +54,37 @@ class LightComponent(Component):
         self.volume = mesh_tree
         return self
 
+    def apply_light(self: Self, shader: ShaderProgram, light_index: int) -> None:
+        transform: TransformComponent = self.owner.get_component(TransformComponent)
+        if transform is not None:
+            pg.gl().uni_vec3(shader, f"lights[{light_index}].position", transform.transform.position)
+            pg.gl().uni_vec3(shader, f"lights[{light_index}].color", self.color)
+            pg.gl().uni_float1(shader, f"lights[{light_index}].intensity", self.intensity)
+            pg.gl().uni_float1(shader, f"lights[{light_index}].attenuation", self.attenuation)
+
     def tick(self: Self, delta: float) -> None:
         return super().tick(delta)
 
-    def draw_pass_geometry(self: Self) -> None:
-        return super().draw_pass_geometry()
+    def draw_pass(self: Self, pass_index: int) -> None:
+        return super().draw_pass(pass_index)
 
-    def draw_pass_lighting(self: Self) -> None:
-        transform = self.owner.get_component(TransformComponent)
-        if transform is not None:
-            gl.glCullFace(gl.GL_FRONT)
-            scene_shader = pg.gl().get_active_pipeline_stage().draw_shader
-            gl.glUniform3f(scene_shader.get_uniform_loc("LightPos"), transform.transform.position.x, transform.transform.position.y, transform.transform.position.z)
-            gl.glUniform3f(scene_shader.get_uniform_loc("LightColor"), self.color.x, self.color.y, self.color.z)
-            gl.glUniform3f(scene_shader.get_uniform_loc("LightDir"), self.direction.x, self.direction.y, self.direction.z)
-            gl.glUniform1f(scene_shader.get_uniform_loc("LightIntensity"), self.intensity)
-            gl.glUniform1i(scene_shader.get_uniform_loc("LightType"), self.type.value)
-            pg.gl().push_mat_model(transform.transform.as_mat4())
-            self._draw_node(self.volume.root, scene_shader)
-            pg.gl().pop_mat_model()
-            gl.glCullFace(gl.GL_BACK)
+    def draw_gui(self: Self) -> None:
 
-        return super().draw_pass_lighting()
+        col_changed, col_val = imgui.color_edit3("color", *self.color)
 
-    def _draw_node(self: Self, node: Node[MeshNode], scene_shader: ShaderProgram) -> None:
+        if col_changed:
+            self.color.x = col_val[0]
+            self.color.y = col_val[1]
+            self.color.z = col_val[2]
 
-        pg.gl().push_mat_model(node.obj.transform.as_mat4())
+        intensity_changed, intensity_val = imgui.input_float("intensity", self.intensity)
 
-        program = scene_shader.program
+        if intensity_changed:
+            self.intensity = intensity_val
 
-        for mesh in node.obj.meshes:
-            pg.gl().apply_mvp(program)
-            mesh.vao.bind()
+        attenuation_changed, attenuation_val = imgui.input_float("attenuation", self.attenuation)
 
-            gl.glDrawElements(gl.GL_TRIANGLES,
-                              mesh.n_indices,
-                              mesh.index_type,
-                              None)
+        if attenuation_changed:
+            self.attenuation = attenuation_val
 
-            mesh.vao.unbind()
-
-        for child in node.children:
-            self._draw_node(child, scene_shader)
-
-        pg.gl().pop_mat_model()
+        return super().draw_gui()
