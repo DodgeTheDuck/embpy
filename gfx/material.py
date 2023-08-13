@@ -1,40 +1,17 @@
-from ast import Dict, List
-from enum import Enum
+
 from typing import Self
-from gfx.texture import Texture
+
+from gfx.material_properties import MaterialProperties
+from gfx.shader_program import ShaderProgram
 
 
-class TextureType(Enum):
-    none = 0
-    albedo = 1
-    metallic_roughness = 2
-    normal = 3
+class Material():
+    def __init__(self: Self, shader: ShaderProgram, properties: MaterialProperties) -> None:
+        self.properties = properties
+        self.shader = shader
 
+    def set_shader(self: Self, shader: ShaderProgram) -> None:
+        self.shader = shader
 
-class ScalarType(Enum):
-    none = 0
-    metallic = 1
-    roughness = 2
-
-
-class Material:
-    def __init__(self: Self) -> None:
-        self.textures: Dict[TextureType, Texture] = {}
-        self.name = ""
-        self.scalars: Dict[ScalarType, float] = {}
-        self.col_albedo: List[float] = []
-
-    def set_scalar(self: Self, scalar_type: ScalarType, value: float) -> None:
-        self.scalars[scalar_type] = value
-
-    def get_scalar(self: Self, scalar_type: ScalarType) -> None:
-        return self.scalars[scalar_type]
-
-    def set_texture(self: Self, tex_type: TextureType, texture: Texture) -> None:
-        self.textures[tex_type] = texture
-
-    def get_texture(self: Self, tex_type: TextureType) -> Texture:
-        return self.textures[tex_type]
-
-    def has_texture(self: Self, tex_type: TextureType) -> bool:
-        return tex_type in self.textures
+    def set_properties(self: Self, properties: MaterialProperties) -> None:
+        self.properties = properties

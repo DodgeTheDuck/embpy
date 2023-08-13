@@ -7,7 +7,7 @@ from typing import Self
 
 import pygame
 from component.light_component import LightComponent, LightType
-from gfx.deffered_pbr_pipeline import DefferedPbrPipeline
+from gfx.pipeline.basic_shading_pipeline import BasicShadingPipeline
 from gfx.mesh_node import MeshNode
 import gui.gui as gui
 
@@ -20,7 +20,6 @@ from component.transform_component import TransformComponent
 from loaders.gltf_loader import GltfLoader
 from core.node_graph import NodeGraph
 from scene.scene_object import SceneObject, SceneObjectType
-import OpenGL.GL as gl
 import core.pg as pg
 import core.engine as engine
 
@@ -33,7 +32,7 @@ class AppStateDev(AppState):
 
         # set up test model
 
-        pg.gl().set_pipeline(DefferedPbrPipeline())
+        pg.gl().set_pipeline(BasicShadingPipeline())
 
         loader: GltfLoader = GltfLoader("models/gltf/roman_armour/armour.glb")
         armour_mesh: NodeGraph[MeshNode] = loader.load()
@@ -83,35 +82,20 @@ class AppStateDev(AppState):
         engine.scene.tick(delta)
         return super().tick(delta)
 
-    def draw_geometry(self: Self) -> None:
-        pg.gl().push_mat_view(self.camera.transform)
-        pg.gl().push_mat_proj(self.camera.projection)
-        engine.scene.draw_geometry()
-        pg.gl().pop_mat_proj()
-        pg.gl().pop_mat_view()
-        return super().draw_geometry()
+    def draw_pass(self: Self, pass_index: int) -> None:
+        if pass_index == BasicShadingPipeline.Stage.RENDER.value:
+            pg.gl().push_mat_view(self.camera.transform)
+            pg.gl().push_mat_proj(self.camera.projection)
+            engine.scene.draw_geometry()
+            pg.gl().pop_mat_proj
+            pg.gl().pop_mat_view()
+            pass
+        return super().draw_pass(pass_index)
 
-    def draw_lighting(self: Self) -> None:
-        pg.gl().push_mat_view(self.camera.transform)
-        pg.gl().push_mat_proj(self.camera.projection)
-        engine.scene.draw_lighting()
-        pg.gl().pop_mat_proj()
-        pg.gl().pop_mat_view()
-        return super().draw_lighting()
-
-    # NOTE: temporary, until i sort out how to handle cameras in engine
-    def draw_camera(self: Self) -> None:
-        gl.glUniform3f(pg.gl().get_active_pipeline_stage().draw_shader.get_uniform_loc("viewPos"),
-                       self.camera.position.x,
-                       self.camera.position.y,
-                       self.camera.position.z)
-
-        return super().draw_lighting()
-
-    def gui(self: Self) -> None:
+    def draw_gui(self: Self) -> None:
         gui.scene_graph(engine.scene.graph)
         gui.object_properties()
-        return super().gui()
+        return super().draw_gui()
 
     def event(self: Self, event: pygame.Event) -> None:
         match event.type:

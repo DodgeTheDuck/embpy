@@ -1,6 +1,5 @@
 from component.transform_component import TransformComponent
-from gfx.shader_program import ShaderProgram
-from gfx.material import Material, ScalarType, TextureType
+from gfx.material_properties import MaterialProperties, TextureType
 from gfx.mesh_node import MeshNode
 from core.node_graph import Node, NodeGraph
 import core.pg as pg
@@ -28,77 +27,72 @@ class ModelComponent(Component):
         return super().tick(delta)
 
     def draw_pass_geometry(self: Self) -> None:
-        transform = self.owner.get_component(TransformComponent)
+        transform: TransformComponent = self.owner.get_component(TransformComponent)
         if transform is not None:
-            scene_shader = pg.gl().get_active_pipeline_stage().draw_shader
+
             pg.gl().push_mat_model(transform.transform.as_mat4())
+            # gl.glUniform1i(shader.get_uniform_loc("albedo"), 0)
 
-            gl.glUniform1i(scene_shader.get_uniform_loc("texAlbedo"), 0)
-            gl.glUniform1i(scene_shader.get_uniform_loc("texMetallicRoughness"), 1)
-            gl.glUniform1i(scene_shader.get_uniform_loc("texNormal"), 2)
-
-            self._draw_node(self.mesh_tree.root, scene_shader)
+            self._draw_node(self.mesh_tree.root)
 
             pg.gl().pop_mat_model()
 
         return super().draw_pass_geometry()
 
-    def _draw_node(self: Self, node: Node[MeshNode], scene_shader: ShaderProgram) -> None:
+    def _draw_node(self: Self, node: Node[MeshNode]) -> None:
 
+        # apply node transform
         pg.gl().push_mat_model(node.obj.transform.as_mat4())
 
-        program = scene_shader.program
-
         for mesh in node.obj.meshes:
-            material: Material = mesh.material
-            pg.gl().apply_mvp(program)
+            mat_properties, shader = mesh.material.properties, mesh.material.shader
+            # apply material shader
+            shader.use()
+            # send current mvp state to shader
+            pg.gl().apply_mvp(shader.program)
+            # bind mesh VAO
             mesh.vao.bind()
-            gl.glUniform1i(gl.glGetUniformLocation(program, "hasTexture"), 1)
-            gl.glUniform1f(scene_shader.get_uniform_loc("scaMetallic"), material.get_scalar(ScalarType.metallic))
-            gl.glUniform1f(scene_shader.get_uniform_loc("scaRoughness"), material.get_scalar(ScalarType.roughness))
 
-            if material.has_texture(TextureType.albedo):
-                texture = material.get_texture(TextureType.albedo).texture
+            # bind material textures
+            if mat_properties.has_texture(TextureType.albedo):
+                texture = mat_properties.get_texture(TextureType.albedo).texture
                 gl.glActiveTexture(gl.GL_TEXTURE0)
                 gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
-            if material.has_texture(TextureType.metallic_roughness):
-                texture = material.get_texture(TextureType.metallic_roughness).texture
+            if mat_properties.has_texture(TextureType.metallic_roughness):
+                texture = mat_properties.get_texture(TextureType.metallic_roughness).texture
                 gl.glActiveTexture(gl.GL_TEXTURE1)
                 gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
-            if material.has_texture(TextureType.normal):
-                texture = material.get_texture(TextureType.normal).texture
+            if mat_properties.has_texture(TextureType.normal):
+                texture = mat_properties.get_texture(TextureType.normal).texture
                 gl.glActiveTexture(gl.GL_TEXTURE2)
                 gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
-            # else:
-            #     gl.glUniform1i(gl.glGetUniformLocation(program,
-            #                                            "hasTexture"), 0)
-            #     pg.gl().bind_empty_texture()
 
+            # draw mesh
             gl.glDrawElements(gl.GL_TRIANGLES,
                               mesh.n_indices,
                               mesh.index_type,
                               None)
 
-            mesh.vao.unbind()
-
+        # draw rest of node tree
         for child in node.children:
-            self._draw_node(child, scene_shader)
+            self._draw_node(child)
 
+        # pop node transform
         pg.gl().pop_mat_model()
 
     def gui(self: Self) -> None:
         if imgui.collapsing_header("Meshes")[0]:
             self._draw_node_gui(self.mesh_tree.root)
         if imgui.collapsing_header("Materials")[0]:
-            mats: list[Material] = []
+            mats: list[MaterialProperties] = []
             self._get_materials(self.mesh_tree.root, mats)
             for mat in mats:
                 imgui.text_ansi(mat.name)
         return super().gui()
 
-    def _get_materials(self: Self, node: Node[MeshNode], materials: list[Material]) -> None:
+    def _get_materials(self: Self, node: Node[MeshNode], materials: list[MaterialProperties]) -> None:
         for mesh in node.obj.meshes:
-            materials.append(mesh.material)
+            materials.append(mesh.material_properties)
         for child in node.children:
             self._get_materials(child, materials)
 

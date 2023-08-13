@@ -2,7 +2,9 @@ import pygame
 from core.app_state import AppState
 import core.input as input
 from gfx.pygl import Pygl
+from gfx.renderer_setup.renderer_setup_3d import RendererSetup3d
 import gui.gui as gui
+import core.engine as engine
 
 _window_surface: pygame.surface.Surface = None
 _pygl: Pygl = None
@@ -16,11 +18,16 @@ def init_pygame(window_width: int, window_height: int) -> None:
     pygame.display.gl_set_attribute(pygame.GL_CONTEXT_PROFILE_MASK,
                                     pygame.GL_CONTEXT_PROFILE_CORE)
 
+    engine.console.write_line(f"creating display: {window_width, window_height}")
+
     _window_surface = pygame.display.set_mode([window_width, window_height],
                                               pygame.OPENGL | pygame.DOUBLEBUF,
                                               24)
-    _pygl = Pygl()
-    _pygl.init_gl(window_width, window_height)
+
+    engine.console.write_line("initialising pygl...")
+    _pygl = Pygl(RendererSetup3d())
+    _pygl.init_gl()
+    engine.console.write_line("initialising pygl complete")
 
 
 def swap_buffers() -> None:

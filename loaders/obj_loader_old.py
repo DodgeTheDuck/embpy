@@ -2,7 +2,7 @@
 import time
 import pywavefront
 from gfx.texture import Texture
-from gfx.material import Material, TextureType
+from gfx.material_properties import MaterialProperties, TextureType
 from gfx.mesh import Mesh
 import core.engine as engine
 
@@ -21,7 +21,7 @@ def load_obj(filename: str) -> list[Mesh]:
 
     for mesh in scene.mesh_list:
         for material in mesh.materials:
-            mesh_material: Material = Material()
+            mesh_material: MaterialProperties = MaterialProperties()
             positions: list[float] = list[float]()
             normals: list[float] = list[float]()
             uvs: list[float] = list[float]()

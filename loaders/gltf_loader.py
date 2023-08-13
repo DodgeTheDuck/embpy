@@ -2,9 +2,11 @@ import os
 import time
 from typing import Self
 import glm
+from asset.asset_shader import AssetShader
 from gfx.buffer_data import BufferData
+from gfx.material import Material
 from gfx.texture import Sampler, Texture
-from gfx.material import Material, ScalarType, TextureType
+from gfx.material_properties import MaterialProperties, ScalarType, TextureType
 from gfx.mesh import Mesh
 import pygltflib as gltf
 from gfx.attribute import Attribute
@@ -13,6 +15,7 @@ from gfx.mesh_node import MeshNode
 from core.node_graph import NodeGraph, Node
 from gfx.transform import Transform
 import core.engine as engine
+import asset.asset_manager as asset_manager
 
 
 type_map = {
@@ -67,7 +70,7 @@ class GltfLoader:
 
         engine.console.write_line(f"loading material: {gltf_material.name}")
 
-        material: Material = Material()
+        material: MaterialProperties = MaterialProperties()
         albedo: Texture = None
         metallic_roughness: Texture = None
         normal: Texture = None
@@ -136,7 +139,7 @@ class GltfLoader:
 
         material.name = gltf_material.name
 
-        return material
+        return Material(asset_manager.instantiate_asset("basic_shading").object, material)
 
     def _parse_primitive(self: Self, model: gltf.GLTF2, node: gltf.Node, primitive: gltf.Primitive, buffers: list[bytes]) -> Mesh:
 

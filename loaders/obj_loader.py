@@ -1,7 +1,7 @@
 
 
 from gfx.texture import Texture
-from gfx.material import Material, TextureType
+from gfx.material_properties import MaterialProperties, TextureType
 from gfx.mesh import Mesh
 
 
@@ -37,8 +37,8 @@ def load_obj(file_path: str) -> Mesh:
     return meshes
 
 
-def parse_material(material_file: str) -> Material:
-    material = Material()
+def parse_material(material_file: str) -> MaterialProperties:
+    material = MaterialProperties()
     current_texture_type = None
 
     with open(material_file, 'r') as file:

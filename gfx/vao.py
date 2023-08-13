@@ -2,9 +2,6 @@
 from typing import Self
 import OpenGL.GL as gl
 
-# TODO:
-# - move vbo setup outside of VAO
-
 
 class VAO:
     def __init__(self: Self) -> None:

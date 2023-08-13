@@ -1,7 +1,7 @@
 
 from typing import Self
-from gfx.pipeline import Pipeline
-from gfx.pipeline_stage import PipelineStage
+from gfx.pipeline.pipeline import Pipeline
+from gfx.pipeline.pipeline_stage import PipelineStage
 from loaders.shader_loader import ShaderLoader
 
 
@@ -15,7 +15,7 @@ class DefferedPbrPipeline(Pipeline):
         light_pass_loader = ShaderLoader("assets/shader/light_pass.shader")
         light_pass_shader = light_pass_loader.load()
 
-        shading_loader = ShaderLoader("assets/shader/shader.shader")
+        shading_loader = ShaderLoader("assets/shader/shading.shader")
         shading_shader = shading_loader.load()
 
         blit_loader = ShaderLoader("assets/shader/fbo_draw.shader")

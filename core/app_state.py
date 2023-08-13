@@ -16,19 +16,11 @@ class AppState(ABC):
         pass
 
     @abstractmethod
-    def draw_geometry(self: Self) -> None:
+    def draw_pass(self: Self, pass_index: int) -> None:
         pass
 
     @abstractmethod
-    def draw_lighting(self: Self) -> None:
-        pass
-
-    @abstractmethod
-    def draw_camera(self: Self) -> None:
-        pass
-
-    @abstractmethod
-    def gui(self: Self) -> None:
+    def draw_gui(self: Self) -> None:
         pass
 
     @abstractmethod

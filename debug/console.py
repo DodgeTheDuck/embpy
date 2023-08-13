@@ -12,7 +12,7 @@ class Console:
     def write_line(self: Self, line: str) -> None:
         self.lines.append(">: " + line)
 
-    def gui(self: Self) -> None:
+    def draw_gui(self: Self) -> None:
         imgui.set_next_window_size(config.WINDOW_WIDTH - 400, 256)
         imgui.set_next_window_position(0, config.WINDOW_HEIGHT - 256)
         imgui.begin("Console", flags=imgui.WINDOW_NO_COLLAPSE | imgui.WINDOW_NO_SCROLLBAR | imgui.WINDOW_NO_RESIZE)

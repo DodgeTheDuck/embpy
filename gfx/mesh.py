@@ -2,9 +2,9 @@
 from typing import Self
 
 from gfx.buffer_data import BufferData
+from gfx.material import Material
 from gfx.vao import VAO
 from gfx.vbo import VBO
-from gfx.material import Material
 
 # TODO:
 # - manage resources better; delete vert/index data after buffers created?

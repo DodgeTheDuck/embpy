@@ -4,9 +4,6 @@ from imgui.integrations.opengl import ProgrammablePipelineRenderer
 import imgui
 import config
 import pygame as pg
-
-import core.pg as engine_pg
-
 from scene.scene_graph import SceneGraph
 from scene.scene_object import SceneObject
 
@@ -86,14 +83,15 @@ def scene_graph(graph: SceneGraph) -> SceneObject:
 
 
 def pipeline() -> None:
-    imgui.begin("Pipeline")
-    for stage in engine_pg.gl().pipeline.stages.values():
-        if imgui.collapsing_header(stage.name)[0]:
-            for tex in stage.fbo.textures:
-                imgui.image(tex, 128 * config.ASPECT_RATIO, 128, (1, 1), (0, 0))
-            pass
+    # imgui.begin("Pipeline")
+    # for stage in engine_pg.gl().pipeline.stages.values():
+    #     if imgui.collapsing_header(stage.name)[0]:
+    #         for tex in stage.fbo.textures:
+    #             imgui.image(tex, 128 * config.ASPECT_RATIO, 128, (1, 1), (0, 0))
+    #         pass
 
-    imgui.end()
+    # imgui.end()
+    pass
 
 
 def menu() -> None:
