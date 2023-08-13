@@ -23,9 +23,6 @@ from scene.scene_object import SceneObject, SceneObjectType
 import core.pg as pg
 import core.engine as engine
 
-# TODO:
-# - move most of the stuff here in to the main engine
-
 
 class AppStateDev(AppState):
     def init(self: Self) -> None:
@@ -34,7 +31,7 @@ class AppStateDev(AppState):
 
         pg.gl().set_pipeline(BasicShadingPipeline())
 
-        loader: GltfLoader = GltfLoader("models/gltf/roman_armour/armour.glb")
+        loader: GltfLoader = GltfLoader("assets/models/roman_armour/armour.glb")
         armour_mesh: NodeGraph[MeshNode] = loader.load()
 
         armour_obj = SceneObject("test object", SceneObjectType.entity)

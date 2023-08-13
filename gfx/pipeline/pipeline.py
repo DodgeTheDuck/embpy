@@ -4,7 +4,6 @@ from typing import Self
 
 from gfx.pipeline.pipeline_stage import PipelineStage
 import imgui
-import config
 
 
 class Pipeline:

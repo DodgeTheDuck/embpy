@@ -2,7 +2,6 @@ import os
 import time
 from typing import Self
 import glm
-from asset.asset_shader import AssetShader
 from gfx.buffer_data import BufferData
 from gfx.material import Material
 from gfx.texture import Sampler, Texture
@@ -15,7 +14,7 @@ from gfx.mesh_node import MeshNode
 from core.node_graph import NodeGraph, Node
 from gfx.transform import Transform
 import core.engine as engine
-import asset.asset_manager as asset_manager
+import core.asset.asset_manager as asset_manager
 
 
 type_map = {

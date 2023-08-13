@@ -10,7 +10,6 @@ import asset.asset_manager as asset_manager
 from core.app_state import AppState
 from core.interval_timer import CallbackInterval, Timer
 from scene.scene import Scene
-import OpenGL.GL as gl
 
 console: Console = None
 scene: Scene = None
@@ -23,24 +22,35 @@ _impl = None
 
 
 def init(root_state: AppState) -> None:
-    global _engine_timer, _tick_interval, _draw_interval, _impl, console, scene
-    console = Console()
+    """
+    Initialise engine state.
 
+    :param root_state: Bootstrapping app state.
+    """
+
+    global _engine_timer, _tick_interval, _draw_interval, _impl, console, scene
+
+    # create sub systems
+    console = Console()
     scene = Scene()
 
+    # init pygame
     console.write_line("initialising...")
     console.write_line("init pygame")
     pg.init_pygame(config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
-    _app_states.append(root_state)
 
-    console.write_line("load assets...")
+    # load assets NOTE: will be automated at some point
+    console.write_line("loading assets...")
     asset_manager.add_asset(AssetShader("basic_shading", "assets/shader/basic_shading.shader").load())
     asset_manager.add_asset(AssetShader("fbo_blit", "assets/shader/fbo_blit.shader").load())
     console.write_line("assets loaded")
 
+    # init engine bootstrapping state
     console.write_line("init app")
+    _app_states.append(root_state)
     root_state.init()
 
+    # set up engine timings
     _engine_timer = Timer()
     _tick_interval = _engine_timer.set_interval(1.0 / config.TPS,
                                                 _tick,
@@ -48,6 +58,8 @@ def init(root_state: AppState) -> None:
     _draw_interval = _engine_timer.set_interval(1.0 / config.FPS,
                                                 _draw,
                                                 "Draw")
+
+    # init GUI
     console.write_line("init GUI")
     gui.init()
 
@@ -55,15 +67,32 @@ def init(root_state: AppState) -> None:
 
 
 def run() -> None:
+    """
+    Begin main engine loop.
+
+    Loop exits when pygame QUIT event is thrown.
+    """
+
     while pg.handle_window_events(_app_states[-1]):
         _engine_timer.update()
 
 
 def _tick(delta: int) -> None:
+    """
+    Perform engine/app logic.
+
+    :param delta: Time in seconds since last _tick call
+    """
+
     _app_states[-1].tick(delta)
 
 
 def _draw(delta: int) -> None:
+    """
+    Perform engine/app drawing.
+
+    :param delta: Time in seconds since last _draw call
+    """
 
     # run render pipeline
     while (pg.gl().get_active_pipeline().next()):
