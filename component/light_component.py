@@ -1,8 +1,6 @@
 
 from enum import Enum
-from lib2to3.pgen2 import pgen
 from typing import Self
-from glm import vec3
 import glm
 from component.component import Component
 from component.transform_component import TransformComponent
@@ -54,13 +52,20 @@ class LightComponent(Component):
         self.volume = mesh_tree
         return self
 
-    def apply_light(self: Self, shader: ShaderProgram, light_index: int) -> None:
+    def apply_light_properties(self: Self, shader: ShaderProgram, light_index: int) -> None:
         transform: TransformComponent = self.owner.get_component(TransformComponent)
         if transform is not None:
             pg.gl().uni_vec3(shader, f"lights[{light_index}].position", transform.transform.position)
             pg.gl().uni_vec3(shader, f"lights[{light_index}].color", self.color)
             pg.gl().uni_float1(shader, f"lights[{light_index}].intensity", self.intensity)
             pg.gl().uni_float1(shader, f"lights[{light_index}].attenuation", self.attenuation)
+
+    def apply_light_view(self: Self, shader: ShaderProgram) -> None:
+        transform: TransformComponent = self.owner.get_component(TransformComponent)
+        if transform is not None:
+            light_proj = glm.ortho(-100, 100, -100, 100, 1, 100)
+            light_view = glm.lookAt(transform.transform.position, glm.vec3(0, 0, 0), glm.vec3(0, 1, 0))
+            pg.gl().uni_mat4(shader.program, "pv", light_proj * light_view)
 
     def tick(self: Self, delta: float) -> None:
         return super().tick(delta)

@@ -7,6 +7,7 @@
 
 from collections import deque
 from core.asset.asset_shader import AssetShader
+from core.asset.asset_texture import AssetTexture
 from debug.console import Console
 from core.app_state import AppState
 from core.interval_timer import CallbackInterval, Timer
@@ -51,6 +52,8 @@ def init(root_state: AppState) -> None:
     console.write_line("loading assets...")
     asset_manager.add_asset(AssetShader("basic_shading", "assets/shader/basic_shading.shader").load())
     asset_manager.add_asset(AssetShader("fbo_blit", "assets/shader/fbo_blit.shader").load())
+    asset_manager.add_asset(AssetShader("depth_shader", "assets/shader/depth_shader.shader").load())
+    asset_manager.add_asset(AssetTexture("empty_tex", "assets/textures/empty_tex.bmp").load())
     console.write_line("assets loaded")
 
     # init engine bootstrapping state
@@ -105,7 +108,7 @@ def _draw(delta: int) -> None:
     # run render pipeline
     while (pg.gl().get_active_pipeline().next()):
         pg.gl().clear()
-        _app_states[-1].draw_pass(pg.gl().get_active_pipeline().get_active_stage())
+        _app_states[-1].draw_pass(pg.gl().get_active_pipeline().get_active_stage_index())
 
     # finalise pipeline
     pg.gl().get_active_pipeline().end()

@@ -1,5 +1,6 @@
 
 from typing import Self
+from gfx.attribute import AttributeType
 
 from gfx.buffer_data import BufferData
 from gfx.material import Material
@@ -20,6 +21,7 @@ class Mesh:
         self.n_indices = n_indices
         self.index_type = index_type
         self.material = material
+        self.attribute_types: list[AttributeType] = list[AttributeType]()
         vao.bind()
 
         for data in buffer_data:
@@ -27,6 +29,7 @@ class Mesh:
             vbo.bind()
             if data.attributes:
                 for attribute in data.attributes:
+                    self.attribute_types.append(attribute.att_type)
                     attribute.bind()
 
         vao.unbind()

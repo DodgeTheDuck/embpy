@@ -102,3 +102,6 @@ class Pygl:
 
     def uni_float1(self: Self, shader: ShaderProgram, name: str, fl: float) -> None:
         gl.glUniform1f(gl.glGetUniformLocation(shader.program, name), fl)
+
+    def uni_int1(self: Self, shader: ShaderProgram, name: str, i: int) -> None:
+        gl.glUniform1i(gl.glGetUniformLocation(shader.program, name), i)

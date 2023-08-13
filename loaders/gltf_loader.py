@@ -8,7 +8,7 @@ from gfx.texture import Sampler, Texture
 from gfx.material_properties import MaterialProperties, ScalarType, TextureType
 from gfx.mesh import Mesh
 import pygltflib as gltf
-from gfx.attribute import Attribute
+from gfx.attribute import Attribute, AttributeType
 import OpenGL.GL as gl
 from gfx.mesh_node import MeshNode
 from core.node_graph import NodeGraph, Node
@@ -71,6 +71,7 @@ class GltfLoader:
 
         material: MaterialProperties = MaterialProperties()
         albedo: Texture = None
+        albedo_color: glm.vec3 = glm.vec3(1, 1, 1)
         metallic_roughness: Texture = None
         normal: Texture = None
 
@@ -112,6 +113,11 @@ class GltfLoader:
 
                 albedo = self._parse_image(model, sampler, gltf_image, buffers)
 
+            if property.baseColorFactor:
+                albedo_color.x = property.baseColorFactor[0]
+                albedo_color.y = property.baseColorFactor[1]
+                albedo_color.z = property.baseColorFactor[2]
+
             if property.metallicRoughnessTexture:
                 gltf_roughness: gltf.Texture = model.textures[property.metallicRoughnessTexture.index]
                 gltf_sampler: gltf.Sampler = model.samplers[gltf_roughness.sampler]
@@ -136,6 +142,8 @@ class GltfLoader:
         material.set_scalar(ScalarType.metallic, metallic_factor)
         material.set_scalar(ScalarType.roughness, roughness_factor)
 
+        material.col_albedo = albedo_color
+
         material.name = gltf_material.name
 
         return Material(asset_manager.instantiate_asset("basic_shading").object, material)
@@ -150,19 +158,19 @@ class GltfLoader:
         if primitive.attributes.POSITION is not None:
             att_accessors["POSITION"] = acc = model.accessors[primitive.attributes.POSITION]
             att_views["POSITION"] = view = model.bufferViews[acc.bufferView]
-            attributes.append(Attribute(0, type_map[acc.type], acc.componentType, view.byteOffset + acc.byteOffset, view.byteStride))
+            attributes.append(Attribute(AttributeType.POSITION, 0, type_map[acc.type], acc.componentType, view.byteOffset + acc.byteOffset, view.byteStride))
         if primitive.attributes.NORMAL is not None:
             att_accessors["NORMAL"] = acc = model.accessors[primitive.attributes.NORMAL]
             att_views["NORMAL"] = view = model.bufferViews[acc.bufferView]
-            attributes.append(Attribute(1, type_map[acc.type], acc.componentType, view.byteOffset + acc.byteOffset, view.byteStride))
+            attributes.append(Attribute(AttributeType.NORMAL, 1, type_map[acc.type], acc.componentType, view.byteOffset + acc.byteOffset, view.byteStride))
         if primitive.attributes.TANGENT is not None:
             att_accessors["TANGENT"] = acc = model.accessors[primitive.attributes.TANGENT]
             att_views["TANGENT"] = view = model.bufferViews[acc.bufferView]
-            attributes.append(Attribute(2, type_map[acc.type], acc.componentType, view.byteOffset + acc.byteOffset, view.byteStride))
+            attributes.append(Attribute(AttributeType.TANGENT, 2, type_map[acc.type], acc.componentType, view.byteOffset + acc.byteOffset, view.byteStride))        
         if primitive.attributes.TEXCOORD_0 is not None:
             att_accessors["TEXCOORD_0"] = acc = model.accessors[primitive.attributes.TEXCOORD_0]
             att_views["TEXCOORD_0"] = view = model.bufferViews[acc.bufferView]
-            attributes.append(Attribute(3, type_map[acc.type], acc.componentType, view.byteOffset + acc.byteOffset, view.byteStride))
+            attributes.append(Attribute(AttributeType.TEX_COORD, 3, type_map[acc.type], acc.componentType, view.byteOffset + acc.byteOffset, view.byteStride))
 
         ind_acc = model.accessors[primitive.indices]
         ind_view = model.bufferViews[ind_acc.bufferView]

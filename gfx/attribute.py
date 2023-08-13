@@ -1,11 +1,21 @@
 
 import ctypes
+from enum import Enum
 from typing import Self
 import OpenGL.GL as gl
 
 
+class AttributeType(Enum):
+    NONE = 0
+    POSITION = 1
+    NORMAL = 2
+    TANGENT = 3
+    TEX_COORD = 4
+
+
 class Attribute:
-    def __init__(self: Self, location: int, size: int, type: int, offset: int, stride: int) -> None:
+    def __init__(self: Self, att_type: AttributeType, location: int, size: int, type: int, offset: int, stride: int) -> None:
+        self.att_type = att_type
         self.location = location
         self.size = size
         self.type = type

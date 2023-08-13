@@ -29,7 +29,7 @@ class AppStateDev(AppState):
 
         pg.gl().set_pipeline(BasicShadingPipeline())
 
-        loader: GltfLoader = GltfLoader("assets/models/roman_armour/armour.glb")
+        loader: GltfLoader = GltfLoader("assets/models/house/house.glb")
         armour_mesh: NodeGraph[MeshNode] = loader.load()
 
         armour_obj = SceneObject("test object", SceneObjectType.ENTITY)
@@ -38,6 +38,7 @@ class AppStateDev(AppState):
 
         trans_c = TransformComponent(armour_obj)
         trans_c.transform.position = glm.vec3(0, 0, 0)
+        trans_c.transform.scale = glm.vec3(10, 10, 10)
         trans_c.transform.orientation = glm.vec3(0, math.pi, 0)
 
         armour_obj.add_component(mesh_c).add_component(trans_c)
@@ -80,6 +81,16 @@ class AppStateDev(AppState):
             engine.scene.draw_pass(pass_index)
             pg.gl().pop_mat_proj
             pg.gl().pop_mat_view()
+            pass
+        if pass_index == BasicShadingPipeline.Stage.SHADOW.value:
+            lights = engine.scene.get_from_type(SceneObjectType.LIGHT)
+            depth_map = pg.gl().get_active_pipeline().get_active_stage().default_shader
+            depth_map.use()
+            for light in lights:
+                light_c = light.get_component(LightComponent)
+                if light_c is not None:
+                    light_c.apply_light_view(depth_map)
+                    engine.scene.draw_pass(pass_index)
             pass
         return super().draw_pass(pass_index)
 

@@ -1,6 +1,8 @@
 from ast import Dict, List
 from enum import Enum
 from typing import Self
+
+import glm
 from gfx.texture import Texture
 
 
@@ -22,7 +24,7 @@ class MaterialProperties:
         self.textures: Dict[TextureType, Texture] = {}
         self.name = ""
         self.scalars: Dict[ScalarType, float] = {}
-        self.col_albedo: List[float] = []
+        self.col_albedo: glm.vec3 = glm.vec3(0, 0, 0)
 
     def set_scalar(self: Self, scalar_type: ScalarType, value: float) -> None:
         self.scalars[scalar_type] = value

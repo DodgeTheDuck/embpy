@@ -19,8 +19,11 @@ class Pipeline:
         self.active_stage += 1
         return True
 
-    def get_active_stage(self: Self) -> int:
+    def get_active_stage_index(self: Self) -> int:
         return self.active_stage
+
+    def get_active_stage(self: Self) -> PipelineStage:
+        return self.stages[self.active_stage - 1]
 
     def add_stage(self: Self, stage: PipelineStage) -> None:
         self.stages.append(stage)

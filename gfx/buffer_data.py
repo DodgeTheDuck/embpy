@@ -1,7 +1,9 @@
 
 import array
-from ast import Attribute
+
 from typing import Self
+
+from gfx.attribute import Attribute
 
 
 class BufferData:

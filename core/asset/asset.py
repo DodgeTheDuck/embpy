@@ -7,6 +7,7 @@ from typing import Self
 class AssetType(Enum):
     NONE = 0
     SHADER = 1
+    TEXTURE = 2
 
 
 class Asset:

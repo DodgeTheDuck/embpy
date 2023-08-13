@@ -2,6 +2,7 @@ from typing import Self
 import OpenGL.GL as gl
 from gfx.attachment import Attachment, AttachmentType
 from gfx.fbo import FBO
+from gfx.shader_program import ShaderProgram
 from loaders.gltf_loader import GltfLoader
 import core.asset.asset_manager as asset_manager
 import imgui
@@ -9,9 +10,10 @@ import config
 
 
 class PipelineStage:
-    def __init__(self: Self, name: str) -> None:
+    def __init__(self: Self, name: str, default_shader: ShaderProgram = None) -> None:
         loader = GltfLoader("assets/models/rendering/plane/plane.glb")
         meshes = loader.load()
+        self.default_shader = default_shader
         self.mesh = meshes.root.obj.meshes[0]
         self.name = name
         self.fbo = FBO()
@@ -21,6 +23,9 @@ class PipelineStage:
 
     def get_attachment(self: Self, index: int) -> Attachment:
         return self.fbo.attachments[index]
+    
+    def get_default_shader(self: Self) -> ShaderProgram:
+        return self.default_shader
 
     def blit(self: Self) -> None:
         gl.glUseProgram(asset_manager.get_asset("fbo_blit").object.program)
