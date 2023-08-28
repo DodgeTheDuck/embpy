@@ -1,13 +1,10 @@
 import pygame
 from core.app_state import AppState
 import core.input as input
-from gfx.pygl import Pygl
-from gfx.renderer_setup.renderer_setup_3d import RendererSetup3d
 import gui.gui as gui
 import core.engine as engine
 
 _window_surface: pygame.surface.Surface = None
-_pygl: Pygl = None
 
 
 def init_pygame(window_width: int, window_height: int) -> None:
@@ -23,11 +20,6 @@ def init_pygame(window_width: int, window_height: int) -> None:
     _window_surface = pygame.display.set_mode([window_width, window_height],
                                               pygame.OPENGL | pygame.DOUBLEBUF,
                                               24)
-
-    engine.console.write_line("initialising pygl...")
-    _pygl = Pygl(RendererSetup3d())
-    _pygl.init_gl()
-    engine.console.write_line("initialising pygl complete")
 
 
 def swap_buffers() -> None:
@@ -47,7 +39,3 @@ def handle_window_events(app_state: AppState) -> bool:
         gui.handle_event(event)
         app_state.event(event)
     return True
-
-
-def gl() -> Pygl:
-    return _pygl

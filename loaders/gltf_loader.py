@@ -3,9 +3,8 @@ import time
 from typing import Self
 import glm
 from gfx.buffer_data import BufferData
-from gfx.material import Material
-from gfx.texture import Sampler, Texture
-from gfx.material_properties import MaterialProperties, ScalarType, TextureType
+from gfx.material import Material, ColorType, TextureType, ScalarType
+from gfx.texture_2d import Sampler, Texture2D
 from gfx.mesh import Mesh
 import pygltflib as gltf
 from gfx.attribute import Attribute, AttributeType
@@ -52,15 +51,32 @@ class GltfLoader:
 
         return mesh_tree
 
-    def _parse_image(self: Self, model: gltf.GLTF2, sampler: Sampler, gltf_image: gltf.Image, buffers: list[bytes]) -> Texture:
+    def _parse_texture(self: Self, model: gltf.GLTF2, texture: gltf.Texture, buffers: list[bytes]) -> Texture2D:
+
+        gltf_image: gltf.Image = model.images[texture.source]
+        sampler: Sampler = Sampler()
+        if texture.sampler is not None:
+            gltf_sampler: gltf.Sampler = model.samplers[texture.sampler]
+            sampler.tex_wrap_s = gltf_sampler.wrapS
+            sampler.tex_wrap_t = gltf_sampler.wrapT
+            sampler.tex_min_filter = gltf_sampler.minFilter
+            sampler.tex_mag_filter = gltf_sampler.magFilter
+            sampler.target = gl.GL_TEXTURE_2D
+        else:
+            sampler.tex_wrap_s = gl.GL_CLAMP
+            sampler.tex_wrap_t = gl.GL_CLAMP
+            sampler.tex_min_filter = gl.GL_NEAREST
+            sampler.tex_mag_filter = gl.GL_NEAREST
+            sampler.target = gl.GL_TEXTURE_2D
+
         if gltf_image.uri:
-            return Texture(os.path.join(os.path.dirname(self.filepath), gltf_image.uri), sampler)
+            return Texture2D(os.path.join(os.path.dirname(self.filepath), gltf_image.uri), sampler)
         elif gltf_image.bufferView:
             buffer_view = model.bufferViews[gltf_image.bufferView]
             img_data = buffers[buffer_view.buffer][buffer_view.byteOffset:buffer_view.byteOffset + buffer_view.byteLength]
             with open("tex.png", "wb") as binary_file:
                 binary_file.write(img_data)
-            return Texture(img_data, sampler)
+            return Texture2D(img_data, sampler)
 
     def _parse_material(self: Self, model: gltf.GLTF2, gltf_material: gltf.Material, buffers: list[bytes]) -> Material:
 
@@ -69,11 +85,11 @@ class GltfLoader:
 
         engine.console.write_line(f"loading material: {gltf_material.name}")
 
-        material: MaterialProperties = MaterialProperties()
-        albedo: Texture = None
+        material: Material = Material()
+        albedo: Texture2D = None
         albedo_color: glm.vec3 = glm.vec3(1, 1, 1)
-        metallic_roughness: Texture = None
-        normal: Texture = None
+        metallic_roughness: Texture2D = None
+        normal: Texture2D = None
 
         metallic_factor: float = 0.0
         roughness_factor: float = 0.0
@@ -81,17 +97,7 @@ class GltfLoader:
         if gltf_material.normalTexture:
             property = gltf_material.normalTexture
             gltf_normal: gltf.Texture = model.textures[property.index]
-            gltf_sampler: gltf.Sampler = model.samplers[gltf_normal.sampler]
-            gltf_image: gltf.Image = model.images[gltf_normal.source]
-
-            sampler: Sampler = Sampler()
-            sampler.tex_wrap_s = gltf_sampler.wrapS
-            sampler.tex_wrap_t = gltf_sampler.wrapT
-            sampler.tex_min_filter = gltf_sampler.minFilter
-            sampler.tex_mag_filter = gltf_sampler.magFilter
-            sampler.target = gl.GL_TEXTURE_2D
-
-            normal = self._parse_image(model, sampler, gltf_image, buffers)
+            normal = self._parse_texture(model, gltf_normal, buffers)
 
         if gltf_material.pbrMetallicRoughness:
             property = gltf_material.pbrMetallicRoughness
@@ -101,17 +107,7 @@ class GltfLoader:
 
             if property.baseColorTexture:
                 gltf_albedo: gltf.Texture = model.textures[property.baseColorTexture.index]
-                gltf_sampler: gltf.Sampler = model.samplers[gltf_albedo.sampler]
-                gltf_image: gltf.Image = model.images[gltf_albedo.source]
-
-                sampler: Sampler = Sampler()
-                sampler.tex_wrap_s = gltf_sampler.wrapS
-                sampler.tex_wrap_t = gltf_sampler.wrapT
-                sampler.tex_min_filter = gltf_sampler.minFilter
-                sampler.tex_mag_filter = gltf_sampler.magFilter
-                sampler.target = gl.GL_TEXTURE_2D
-
-                albedo = self._parse_image(model, sampler, gltf_image, buffers)
+                albedo = self._parse_texture(model, gltf_albedo, buffers)
 
             if property.baseColorFactor:
                 albedo_color.x = property.baseColorFactor[0]
@@ -120,17 +116,7 @@ class GltfLoader:
 
             if property.metallicRoughnessTexture:
                 gltf_roughness: gltf.Texture = model.textures[property.metallicRoughnessTexture.index]
-                gltf_sampler: gltf.Sampler = model.samplers[gltf_roughness.sampler]
-                gltf_image: gltf.Image = model.images[gltf_roughness.source]
-
-                sampler: Sampler = Sampler()
-                sampler.tex_wrap_s = gltf_sampler.wrapS
-                sampler.tex_wrap_t = gltf_sampler.wrapT
-                sampler.tex_min_filter = gltf_sampler.minFilter
-                sampler.tex_mag_filter = gltf_sampler.magFilter
-                sampler.target = gl.GL_TEXTURE_2D
-
-                metallic_roughness = self._parse_image(model, sampler, gltf_image, buffers)
+                metallic_roughness = self._parse_texture(model, gltf_roughness, buffers)
 
         if albedo:
             material.set_texture(TextureType.albedo, albedo)
@@ -142,11 +128,13 @@ class GltfLoader:
         material.set_scalar(ScalarType.metallic, metallic_factor)
         material.set_scalar(ScalarType.roughness, roughness_factor)
 
-        material.col_albedo = albedo_color
+        material.add_color_property("albedo_col", ColorType.albedo, albedo_color)
 
         material.name = gltf_material.name
 
-        return Material(asset_manager.instantiate_asset("basic_shading").object, material)
+        material.set_shader(asset_manager.instantiate_asset("basic_shading").object)
+
+        return material
 
     def _parse_primitive(self: Self, model: gltf.GLTF2, node: gltf.Node, primitive: gltf.Primitive, buffers: list[bytes]) -> Mesh:
 
@@ -166,7 +154,7 @@ class GltfLoader:
         if primitive.attributes.TANGENT is not None:
             att_accessors["TANGENT"] = acc = model.accessors[primitive.attributes.TANGENT]
             att_views["TANGENT"] = view = model.bufferViews[acc.bufferView]
-            attributes.append(Attribute(AttributeType.TANGENT, 2, type_map[acc.type], acc.componentType, view.byteOffset + acc.byteOffset, view.byteStride))        
+            attributes.append(Attribute(AttributeType.TANGENT, 2, type_map[acc.type], acc.componentType, view.byteOffset + acc.byteOffset, view.byteStride))
         if primitive.attributes.TEXCOORD_0 is not None:
             att_accessors["TEXCOORD_0"] = acc = model.accessors[primitive.attributes.TEXCOORD_0]
             att_views["TEXCOORD_0"] = view = model.bufferViews[acc.bufferView]

@@ -1,8 +1,8 @@
-from typing import Any, Self
-
 import glm
 import OpenGL.GL as gl
+import core.engine as engine
 
+from typing import Any, Self
 from gfx.shader import Shader
 
 
@@ -37,4 +37,4 @@ class ShaderProgram:
                               glm.value_ptr(mvp))
 
     def use(self: Self) -> None:
-        gl.glUseProgram(self.program)
+        engine.gfx.use_shader_program(self)

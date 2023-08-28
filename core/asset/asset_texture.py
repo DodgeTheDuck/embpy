@@ -1,7 +1,7 @@
 
 from typing import Self
 from core.asset.asset import Asset, AssetType
-from gfx.texture import Sampler, Texture
+from gfx.texture_2d import Sampler, Texture2D
 import OpenGL.GL as gl
 
 
@@ -17,7 +17,7 @@ class AssetTexture(Asset):
         sampler.tex_min_filter = gl.GL_NEAREST
         sampler.tex_wrap_s = gl.GL_CLAMP
         sampler.tex_wrap_t = gl.GL_CLAMP
-        self.object = Texture(self.filepath, sampler)
+        self.object = Texture2D(self.filepath, sampler)
         return self
 
     def draw_gui(self: Self) -> None:

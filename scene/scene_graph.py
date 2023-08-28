@@ -14,6 +14,3 @@ class SceneGraph:
 
     def draw_pass(self: Self, pass_index: int) -> None:
         self.root.draw_pass(pass_index)
-
-    def draw_lighting(self: Self) -> None:
-        self.root.draw_pass_lighting()

@@ -6,12 +6,13 @@ in vec2 tex_coords;
 in vec3 normal;
 in mat3 tbn;
 in vec3 eye_pos;
+in vec4 shadow_coord;
 
 layout(binding = 0) uniform sampler2D albedo;
 layout(binding = 2) uniform sampler2D normal_map;
+layout(binding = 9) uniform sampler2D shadow_map;
 
 uniform vec3 albedo_col;
-
 uniform bool has_tangents;
 
 struct Light {
@@ -29,12 +30,15 @@ const float shininess = 32.0;
 void main()
 {
 
+    //frag_color = vec4(1, 0, 0, 1);
+    //return;
+
     vec3 ambient_color = vec3(1.0, 1.0, 1.0);
-    float ambient_intensity = 0.2;
+    float ambient_intensity = 0.1;
 
     vec3 N = vec3(0.0, 0.0, 0.0);
 
-    if(has_tangents) {
+    if(has_tangents) {        
         vec3 sampledNormal = texture(normal_map, tex_coords).rgb * 2.0 - 1.0;
         N = normalize(tbn * sampledNormal);
     } else {
@@ -46,7 +50,7 @@ void main()
     vec3 normalDir = normalize(N);
 
     vec3 totalDiffuse = vec3(0.0);
-    vec3 totalSpecular = vec3(0.0);
+    vec3 totalSpecular = vec3(0.0);    
 
     for (int i = 0; i < 8; ++i)
     {
@@ -70,7 +74,7 @@ void main()
 
     vec3 ambient = ambient_color * ambient_intensity;
 
-    vec3 finalColor = ambient + totalDiffuse + totalSpecular;
+    vec3 finalColor = (ambient + totalDiffuse + totalSpecular);
 
     vec3 albedoColor = texture(albedo, tex_coords).rgb * albedo_col;
     frag_color = vec4(albedoColor * finalColor, 1.0);

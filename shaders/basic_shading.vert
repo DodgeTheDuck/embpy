@@ -9,10 +9,12 @@ out vec2 tex_coords;
 out vec3 normal;
 out mat3 tbn;
 out vec3 eye_pos;
+out vec4 shadow_coord;
 
 uniform mat4 p;
 uniform mat4 v;
 uniform mat4 m;
+uniform mat4 depth_biased_mvp;
 
 void main()
 {
@@ -31,4 +33,5 @@ void main()
     eye_pos = vec3(inverse_view[3][0], inverse_view[3][1], inverse_view[3][2]);
 
     gl_Position = p * v * world_pos;
+    shadow_coord = depth_biased_mvp * world_pos;
 }

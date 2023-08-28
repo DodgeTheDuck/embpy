@@ -15,7 +15,7 @@ class Pipeline:
         if self.active_stage >= len(self.stages):
             self.active_stage = 0
             return False
-        self.stages[self.active_stage].bind()
+        self.stages[self.active_stage].bind_fbo()
         self.active_stage += 1
         return True
 

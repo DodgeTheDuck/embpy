@@ -8,8 +8,9 @@ from core.node_graph import NodeGraph
 from gfx.mesh import Mesh
 from gfx.shader_program import ShaderProgram
 from scene.scene_object import SceneObject
-import core.pg as pg
+import core.engine as engine
 import imgui
+import config
 
 
 class LightType(Enum):
@@ -26,6 +27,8 @@ class LightComponent(Component):
         self.type = LightType.none
         self.attenuation = 1.0
         self.direction = glm.vec3(0, 0, 0)
+        self.enabled = True
+        self.cast_shadows = True
         super().__init__(owner, "Light")
 
     def set_color(self: Self, color: glm.vec3) -> Self:
@@ -52,20 +55,29 @@ class LightComponent(Component):
         self.volume = mesh_tree
         return self
 
-    def apply_light_properties(self: Self, shader: ShaderProgram, light_index: int) -> None:
-        transform: TransformComponent = self.owner.get_component(TransformComponent)
-        if transform is not None:
-            pg.gl().uni_vec3(shader, f"lights[{light_index}].position", transform.transform.position)
-            pg.gl().uni_vec3(shader, f"lights[{light_index}].color", self.color)
-            pg.gl().uni_float1(shader, f"lights[{light_index}].intensity", self.intensity)
-            pg.gl().uni_float1(shader, f"lights[{light_index}].attenuation", self.attenuation)
-
     def apply_light_view(self: Self, shader: ShaderProgram) -> None:
+        if not self.enabled or not self.cast_shadows: return
         transform: TransformComponent = self.owner.get_component(TransformComponent)
         if transform is not None:
-            light_proj = glm.ortho(-100, 100, -100, 100, 1, 100)
+            light_proj = glm.perspective(config.FOV, config.ASPECT_RATIO, 0.01, 100)
             light_view = glm.lookAt(transform.transform.position, glm.vec3(0, 0, 0), glm.vec3(0, 1, 0))
-            pg.gl().uni_mat4(shader.program, "pv", light_proj * light_view)
+            engine.gfx.uni_mat4(shader.program, "p", light_proj)
+            engine.gfx.uni_mat4(shader.program, "v", light_view)
+
+    def get_depth_bias_mvp(self: Self) -> glm.mat4:
+        if not self.enabled or not self.cast_shadows: return glm.mat4()
+        transform: TransformComponent = self.owner.get_component(TransformComponent)
+        if transform is not None:
+            bias_matrix = glm.mat4(
+                0.5, 0.0, 0.0, 0.0,
+                0.0, 0.5, 0.0, 0.0,
+                0.0, 0.0, 0.5, 0.0,
+                0.5, 0.5, 0.5, 1.0
+            )
+            p = glm.perspective(config.FOV, config.ASPECT_RATIO, 0.1, 25)
+            v = glm.lookAt(transform.transform.position, glm.vec3(0, 0, 0), glm.vec3(0, 1, 0))
+            return bias_matrix * p * v
+        return glm.mat4()
 
     def tick(self: Self, delta: float) -> None:
         return super().tick(delta)
@@ -91,5 +103,15 @@ class LightComponent(Component):
 
         if attenuation_changed:
             self.attenuation = attenuation_val
+
+        enabled_changed, enabled_val = imgui.checkbox("enabled", self.enabled)
+
+        if enabled_changed:
+            self.enabled = enabled_val
+
+        shadow_caster_changed, shadow_caster_val = imgui.checkbox("shadow caster", self.cast_shadows)
+
+        if shadow_caster_changed:
+            self.cast_shadows = shadow_caster_val
 
         return super().draw_gui()

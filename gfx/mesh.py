@@ -1,7 +1,7 @@
+import core.engine as engine
 
 from typing import Self
 from gfx.attribute import AttributeType
-
 from gfx.buffer_data import BufferData
 from gfx.material import Material
 from gfx.vao import VAO
@@ -33,3 +33,11 @@ class Mesh:
                     attribute.bind()
 
         vao.unbind()
+
+    def bind(self: Self) -> None:
+        self.vao.bind()
+        self.material.apply()
+        if AttributeType.TANGENT not in self.attribute_types:
+            engine.gfx.uni_int1(self.material.shader, "has_tangents", 0)
+        else:
+            engine.gfx.uni_int1(self.material.shader, "has_tangents", 1)

@@ -11,6 +11,8 @@ from core.asset.asset_texture import AssetTexture
 from debug.console import Console
 from core.app_state import AppState
 from core.interval_timer import CallbackInterval, Timer
+from gfx.gfx import Gfx
+from gfx.renderer_setup.renderer_setup_3d import RendererSetup3d
 from scene.scene import Scene
 import core.asset.asset_manager as asset_manager
 import gui.gui as gui
@@ -21,6 +23,7 @@ import core.pg as pg
 
 console: Console = None
 scene: Scene = None
+gfx: Gfx = None
 
 # VARS: private
 
@@ -37,23 +40,36 @@ def init(root_state: AppState) -> None:
     :param root_state: Bootstrapping app state.
     """
 
-    global _engine_timer, _tick_interval, _draw_interval, console, scene
+    global _engine_timer, _tick_interval, _draw_interval, console, scene, gfx
 
-    # create sub systems
     console = Console()
-    scene = Scene()
-
     # init pygame
     console.write_line("initialising...")
     console.write_line("init pygame")
     pg.init_pygame(config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
+
+    gfx = Gfx(RendererSetup3d())
+    console.write_line("initialising gfx...")
+    gfx.init_gl()
+    console.write_line("initialising gfx complete")
+
+    scene = Scene()
 
     # load assets NOTE: will be automated at some point
     console.write_line("loading assets...")
     asset_manager.add_asset(AssetShader("basic_shading", "assets/shader/basic_shading.shader").load())
     asset_manager.add_asset(AssetShader("fbo_blit", "assets/shader/fbo_blit.shader").load())
     asset_manager.add_asset(AssetShader("depth_shader", "assets/shader/depth_shader.shader").load())
+    asset_manager.add_asset(AssetShader("albedo_only", "assets/shader/albedo_only.shader").load())
     asset_manager.add_asset(AssetTexture("empty_tex", "assets/textures/empty_tex.bmp").load())
+
+    # asset_manager.add_asset(AssetTexture("sky_box_back", "assets/textures/skybox/back.jpg").load())
+    # asset_manager.add_asset(AssetTexture("sky_box_front", "assets/textures/skybox/front.jpg").load())
+    # asset_manager.add_asset(AssetTexture("sky_box_left", "assets/textures/skybox/left.jpg").load())
+    # asset_manager.add_asset(AssetTexture("sky_box_right", "assets/textures/skybox/right.jpg").load())
+    # asset_manager.add_asset(AssetTexture("sky_box_bottom", "assets/textures/skybox/bottom.jpg").load())
+    # asset_manager.add_asset(AssetTexture("sky_box_top", "assets/textures/skybox/top.jpg").load())
+
     console.write_line("assets loaded")
 
     # init engine bootstrapping state
@@ -105,19 +121,25 @@ def _draw(delta: int) -> None:
     :param delta: Time in seconds since last _draw call
     """
 
+    scene.light_manager.cache_lights()
+
+    gfx.get_active_pipeline().begin()
+
     # run render pipeline
-    while (pg.gl().get_active_pipeline().next()):
-        pg.gl().clear()
-        _app_states[-1].draw_pass(pg.gl().get_active_pipeline().get_active_stage_index())
+    while (gfx.get_active_pipeline().next()):
+        gfx.get_active_pipeline().get_active_stage().begin_state()
+        gfx.clear()
+        _app_states[-1].draw_pass(gfx.get_active_pipeline().get_active_stage_index())
+        gfx.get_active_pipeline().get_active_stage().end_state()
 
     # finalise pipeline
-    pg.gl().get_active_pipeline().end()
+    gfx.get_active_pipeline().end()
 
     # render GUI
     gui.start_frame()
     gui.menu()
     console.draw_gui()
-    pg.gl().get_active_pipeline().draw_gui()
+    gfx.get_active_pipeline().draw_gui()
     _app_states[-1].draw_gui()
     asset_manager.draw_gui()
     gui.render()

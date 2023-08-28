@@ -1,5 +1,6 @@
 
 from typing import Self
+from gfx.light_manager import LightManager
 
 from scene.scene_graph import SceneGraph
 from scene.scene_object import SceneObject, SceneObjectType
@@ -8,6 +9,7 @@ from scene.scene_object import SceneObject, SceneObjectType
 class Scene:
     def __init__(self: Self) -> None:
         self.graph = SceneGraph()
+        self.light_manager = LightManager()
         pass
 
     def tick(self: Self, delta: float) -> None:
@@ -15,9 +17,6 @@ class Scene:
 
     def draw_pass(self: Self, pass_index: int) -> None:
         self.graph.draw_pass(pass_index)
-
-    def draw_lighting(self: Self) -> None:
-        self.graph.draw_lighting()
 
     def get_from_type(self: Self, type: SceneObjectType) -> list[SceneObject]:
         return self._get_from_type_recursive(self.graph.root, type, [])

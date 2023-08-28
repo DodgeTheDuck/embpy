@@ -1,25 +1,20 @@
-
-
-import math
 import glm
+import pygame
+import gui.gui as gui
+import core.engine as engine
 
 from typing import Self
-
-import pygame
 from component.light_component import LightComponent, LightType
-from gfx.pipeline.basic_shading_pipeline import BasicShadingPipeline
+from gfx.pipeline.forward_shaded_pipeline import ForwardShadedPipeline
 from gfx.mesh_node import MeshNode
-import gui.gui as gui
-
 from core.app_state import AppState
 from core.camera import Camera
 from component.model_component import ModelComponent
 from component.transform_component import TransformComponent
 from loaders.gltf_loader import GltfLoader
 from core.node_graph import NodeGraph
+from scene.obj_sky_box import ObjSkyBox
 from scene.scene_object import SceneObject, SceneObjectType
-import core.pg as pg
-import core.engine as engine
 
 
 class AppStateDev(AppState):
@@ -27,45 +22,47 @@ class AppStateDev(AppState):
 
         # set up test model
 
-        pg.gl().set_pipeline(BasicShadingPipeline())
+        engine.gfx.set_pipeline(ForwardShadedPipeline())
 
-        loader: GltfLoader = GltfLoader("assets/models/house/house.glb")
-        armour_mesh: NodeGraph[MeshNode] = loader.load()
+        test_obj_loader: GltfLoader = GltfLoader("assets/models/house/house.glb")
+        test_obj_mesh: NodeGraph[MeshNode] = test_obj_loader.load()
 
-        armour_obj = SceneObject("test object", SceneObjectType.ENTITY)
-        mesh_c = ModelComponent(armour_obj)
-        mesh_c.set_mesh_tree(armour_mesh)
+        test_obj = SceneObject("test_object", SceneObjectType.ENTITY)
+        mesh_c = ModelComponent(test_obj)
+        mesh_c.set_mesh_tree(test_obj_mesh)
+        mesh_c.shaded = True
 
-        trans_c = TransformComponent(armour_obj)
+        trans_c = TransformComponent(test_obj)
         trans_c.transform.position = glm.vec3(0, 0, 0)
         trans_c.transform.scale = glm.vec3(10, 10, 10)
-        trans_c.transform.orientation = glm.vec3(0, math.pi, 0)
+        trans_c.transform.orientation = glm.vec3(0, 0, 0)
 
-        armour_obj.add_component(mesh_c).add_component(trans_c)
+        test_obj.add_component(mesh_c).add_component(trans_c)
 
         # set up point light 1
 
-        light_obj = SceneObject("test light 1", SceneObjectType.LIGHT)
+        test_light_loader: GltfLoader = GltfLoader("assets/models/light_bulb/bulb.glb")
+        test_light_mesh: NodeGraph[MeshNode] = test_light_loader.load()
+
+        light_obj = SceneObject("test_light_1", SceneObjectType.LIGHT)
         light_c = LightComponent(light_obj)
-        light_c.set_color(glm.vec3(1, 1, 1)).set_intensity(3000).set_attenuation(5).set_type(LightType.point)
+        light_c.set_color(glm.vec3(1, 1, 1)).set_intensity(400).set_attenuation(0.01).set_type(LightType.point)
 
         light_trans_c = TransformComponent(light_obj)
-        light_trans_c.transform.position = glm.vec3(0, 50, -50)
+        light_trans_c.transform.position = glm.vec3(80, 80, 80)
+        light_trans_c.transform.scale = glm.vec3(10, 10, 10)
 
-        light_obj.add_component(light_c).add_component(light_trans_c)
+        light_mesh_c = ModelComponent(light_obj)
+        light_mesh_c.set_mesh_tree(test_light_mesh)
+        light_mesh_c.shaded = False
 
-        # set up point light 2
+        light_obj.add_component(light_c).add_component(light_trans_c).add_component(light_mesh_c)
 
-        light_obj_2 = SceneObject("test light 2", SceneObjectType.LIGHT)
-        light_c_2 = LightComponent(light_obj_2)
-        light_c_2.set_color(glm.vec3(1, 0, 0)).set_intensity(3000).set_attenuation(5).set_type(LightType.point)
+        # set up skybox
 
-        light_trans_c_2 = TransformComponent(light_obj_2)
-        light_trans_c_2.transform.position = glm.vec3(50, 50, -50)
+        sky_box_obj = ObjSkyBox("sky_box")
 
-        light_obj_2.add_component(light_c_2).add_component(light_trans_c_2)
-
-        engine.scene.graph.root.add_child(armour_obj).add_child(light_obj).add_child(light_obj_2)
+        engine.scene.graph.root.add_child(test_obj).add_child(light_obj).add_child(sky_box_obj)
 
         self.camera: Camera = Camera()
 
@@ -75,28 +72,18 @@ class AppStateDev(AppState):
         return super().tick(delta)
 
     def draw_pass(self: Self, pass_index: int) -> None:
-        if pass_index == BasicShadingPipeline.Stage.RENDER.value:
-            pg.gl().push_mat_view(self.camera.transform)
-            pg.gl().push_mat_proj(self.camera.projection)
+        if pass_index == ForwardShadedPipeline.Stage.RENDER.value:
+            engine.gfx.push_mat_view(self.camera.transform)
+            engine.gfx.push_mat_proj(self.camera.projection)
             engine.scene.draw_pass(pass_index)
-            pg.gl().pop_mat_proj
-            pg.gl().pop_mat_view()
-            pass
-        if pass_index == BasicShadingPipeline.Stage.SHADOW.value:
-            lights = engine.scene.get_from_type(SceneObjectType.LIGHT)
-            depth_map = pg.gl().get_active_pipeline().get_active_stage().default_shader
-            depth_map.use()
-            for light in lights:
-                light_c = light.get_component(LightComponent)
-                if light_c is not None:
-                    light_c.apply_light_view(depth_map)
-                    engine.scene.draw_pass(pass_index)
-            pass
+            engine.gfx.pop_mat_proj
+            engine.gfx.pop_mat_view()
         return super().draw_pass(pass_index)
 
     def draw_gui(self: Self) -> None:
         gui.scene_graph(engine.scene.graph)
         gui.object_properties()
+        self.camera.draw_gui()
         return super().draw_gui()
 
     def event(self: Self, event: pygame.Event) -> None:

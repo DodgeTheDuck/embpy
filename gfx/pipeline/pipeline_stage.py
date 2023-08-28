@@ -1,3 +1,4 @@
+from types import FunctionType
 from typing import Self
 import OpenGL.GL as gl
 from gfx.attachment import Attachment, AttachmentType
@@ -9,6 +10,12 @@ import imgui
 import config
 
 
+class PipelineStageState:
+    def __init__(self: Self, state_name: int, enable: bool) -> None:
+        self.state_name = state_name
+        self.enable = enable
+
+
 class PipelineStage:
     def __init__(self: Self, name: str, default_shader: ShaderProgram = None) -> None:
         loader = GltfLoader("assets/models/rendering/plane/plane.glb")
@@ -17,13 +24,21 @@ class PipelineStage:
         self.mesh = meshes.root.obj.meshes[0]
         self.name = name
         self.fbo = FBO()
+        self.state_begin: FunctionType = None
+        self.state_end: FunctionType = None
+
+    def set_state_begin(self: Self, state_func: FunctionType) -> None:
+        self.state_begin = state_func
+
+    def set_state_end(self: Self, state_func: FunctionType) -> None:
+        self.state_end = state_func
 
     def add_attachment(self: Self, index: int, att_type: AttachmentType) -> None:
         self.fbo.add_attachment(index, att_type)
 
     def get_attachment(self: Self, index: int) -> Attachment:
         return self.fbo.attachments[index]
-    
+
     def get_default_shader(self: Self) -> ShaderProgram:
         return self.default_shader
 
@@ -39,7 +54,15 @@ class PipelineStage:
                           None)
         gl.glEnable(gl.GL_DEPTH_TEST)
 
-    def bind(self: Self) -> None:
+    def begin_state(self: Self) -> None:
+        if self.state_begin is not None:
+            self.state_begin()
+
+    def end_state(self: Self) -> None:
+        if self.state_end is not None:
+            self.state_end()
+
+    def bind_fbo(self: Self) -> None:
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.fbo.buffer)
 
     def unbind(self: Self) -> None:

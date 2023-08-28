@@ -4,6 +4,7 @@ import glm
 import pygame
 import core.input as input
 import config
+import imgui
 
 
 class Camera:
@@ -82,7 +83,13 @@ class Camera:
                                     up)
 
         # TODO: not have this part here
-        # gl.glUniform3f(pg.gl().pipeline.stages["scene"].shader.get_uniform_loc("viewPos"),
+        # gl.glUniform3f(engine.gfx.pipeline.stages["scene"].shader.get_uniform_loc("viewPos"),
         #                self.position.x,
         #                self.position.y,
         #                self.position.z)
+
+    def draw_gui(self: Self) -> None:
+        imgui.begin("Camera")
+        imgui.text(f"pos: [{self.position.x}, {self.position.y}, {self.position.z}]")
+        imgui.text(f"angle: [{self.yaw}, {self.pitch}]")
+        imgui.end()

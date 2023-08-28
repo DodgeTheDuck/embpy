@@ -8,6 +8,7 @@ class SceneObjectType(Enum):
     NONE = 0
     ENTITY = 1
     LIGHT = 2
+    SKYBOX = 3
 
 
 class SceneObject():
