@@ -27,7 +27,6 @@ type_map = {
 class GltfLoader:
     def __init__(self: Self, filepath: str) -> None:
         self.filepath: str = filepath
-        pass
 
     def load(self: Self) -> NodeGraph[MeshNode]:
 

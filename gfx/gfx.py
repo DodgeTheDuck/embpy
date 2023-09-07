@@ -1,3 +1,4 @@
+from enum import Enum
 import OpenGL.GL as gl
 import glm
 import core.engine as engine
@@ -10,6 +11,11 @@ from gfx.pipeline.pipeline import Pipeline
 from gfx.pipeline.pipeline_stage import PipelineStage
 from gfx.renderer_setup.renderer_setup import RendererSetup
 from gfx.shader_program import ShaderProgram
+
+
+class GlConstants(Enum):
+    gl_lequal = gl.GL_LEQUAL
+    gl_less = gl.GL_LESS
 
 
 class Gfx:
@@ -33,9 +39,12 @@ class Gfx:
         v = self.view_stack[-1]
         p = self.proj_stack[-1]
 
-        self.uni_mat4(self.get_active_shader_program(), "m", m)
-        self.uni_mat4(self.get_active_shader_program(), "v", v)
-        self.uni_mat4(self.get_active_shader_program(), "p", p)
+        if "m" in self.active_shader_program.uniforms:
+            self.uni_mat4(self.get_active_shader_program(), "m", m)
+        if "v" in self.active_shader_program.uniforms:
+            self.uni_mat4(self.get_active_shader_program(), "v", v)
+        if "p" in self.active_shader_program.uniforms:
+            self.uni_mat4(self.get_active_shader_program(), "p", p)
 
     def push_mat_model(self: Self, mat: glm.mat4) -> None:
         if len(self.model_stack) == 0:
@@ -81,7 +90,8 @@ class Gfx:
         for mesh in node.obj.meshes:
             mesh.bind()
             self.apply_mvp()
-            engine.scene.light_manager.apply_lights()
+            if mesh.do_lighting:
+                engine.scene.light_manager.apply_lights()
             gl.glDrawElements(gl.GL_TRIANGLES,
                               mesh.n_indices,
                               mesh.index_type,
@@ -95,6 +105,9 @@ class Gfx:
     def use_shader_program(self: Self, shader_program: ShaderProgram) -> None:
         self.active_shader_program = shader_program
         gl.glUseProgram(shader_program.program)
+
+    def depth_function(self: Self, gl_depth_func: GlConstants) -> None:
+        gl.glDepthFunc(gl_depth_func.value)
 
     def enable(self: Self, gl_enable_hint: int) -> None:
         gl.glEnable(gl_enable_hint)

@@ -61,14 +61,15 @@ def init(root_state: AppState) -> None:
     asset_manager.add_asset(AssetShader("fbo_blit", "assets/shader/fbo_blit.shader").load())
     asset_manager.add_asset(AssetShader("depth_shader", "assets/shader/depth_shader.shader").load())
     asset_manager.add_asset(AssetShader("albedo_only", "assets/shader/albedo_only.shader").load())
+    asset_manager.add_asset(AssetShader("skybox", "assets/shader/skybox.shader").load())
     asset_manager.add_asset(AssetTexture("empty_tex", "assets/textures/empty_tex.bmp").load())
 
-    # asset_manager.add_asset(AssetTexture("sky_box_back", "assets/textures/skybox/back.jpg").load())
-    # asset_manager.add_asset(AssetTexture("sky_box_front", "assets/textures/skybox/front.jpg").load())
-    # asset_manager.add_asset(AssetTexture("sky_box_left", "assets/textures/skybox/left.jpg").load())
-    # asset_manager.add_asset(AssetTexture("sky_box_right", "assets/textures/skybox/right.jpg").load())
-    # asset_manager.add_asset(AssetTexture("sky_box_bottom", "assets/textures/skybox/bottom.jpg").load())
-    # asset_manager.add_asset(AssetTexture("sky_box_top", "assets/textures/skybox/top.jpg").load())
+    asset_manager.add_asset(AssetTexture("sky_box_back", "assets/textures/skybox/back.jpg").load())
+    asset_manager.add_asset(AssetTexture("sky_box_front", "assets/textures/skybox/front.jpg").load())
+    asset_manager.add_asset(AssetTexture("sky_box_left", "assets/textures/skybox/left.jpg").load())
+    asset_manager.add_asset(AssetTexture("sky_box_right", "assets/textures/skybox/right.jpg").load())
+    asset_manager.add_asset(AssetTexture("sky_box_bottom", "assets/textures/skybox/bottom.jpg").load())
+    asset_manager.add_asset(AssetTexture("sky_box_top", "assets/textures/skybox/top.jpg").load())
 
     console.write_line("assets loaded")
 

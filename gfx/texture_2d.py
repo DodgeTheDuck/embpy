@@ -5,6 +5,8 @@ import OpenGL.GL as gl
 from PIL import Image
 import numpy
 
+from gfx.texture import Texture
+
 # TODO:
 # - handle image format better
 # - make class better
@@ -22,8 +24,9 @@ class Sampler:
         pass
 
 
-class Texture2D:
+class Texture2D(Texture):
     def __init__(self: Self, data: str | bytes, sampler: Sampler) -> None:
+        super().__init__()
 
         image: Image = None
 
@@ -77,6 +80,10 @@ class Texture2D:
 
         gl.glGenerateMipmap(sampler.target)
         gl.glBindTexture(sampler.target, 0)
+
+    def bind(self: Self, index: int) -> None:
+        gl.glActiveTexture(gl.GL_TEXTURE0 + index)
+        gl.glBindTexture(gl.GL_TEXTURE_2D, self.texture)
 
     def __tex_param(self: Self, target: int, name: int, param: int) -> None:
         if param == 0: return

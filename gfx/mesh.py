@@ -21,6 +21,7 @@ class Mesh:
         self.n_indices = n_indices
         self.index_type = index_type
         self.material = material
+        self.do_lighting = True
         self.attribute_types: list[AttributeType] = list[AttributeType]()
         vao.bind()
 
@@ -37,7 +38,8 @@ class Mesh:
     def bind(self: Self) -> None:
         self.vao.bind()
         self.material.apply()
-        if AttributeType.TANGENT not in self.attribute_types:
-            engine.gfx.uni_int1(self.material.shader, "has_tangents", 0)
-        else:
-            engine.gfx.uni_int1(self.material.shader, "has_tangents", 1)
+        if "has_tangents" in self.material.shader.uniforms:
+            if AttributeType.TANGENT not in self.attribute_types:
+                engine.gfx.uni_int1(self.material.shader, "has_tangents", 0)
+            else:
+                engine.gfx.uni_int1(self.material.shader, "has_tangents", 1)

@@ -7,7 +7,7 @@ import core.engine as engine
 from enum import Enum
 from typing import Self
 from gfx.shader_program import ShaderProgram
-from gfx.texture_2d import Texture2D
+from gfx.texture import Texture
 
 
 class TextureType(Enum):
@@ -38,7 +38,7 @@ class Material():
     def __init__(self: Self) -> None:
         self.name = ""
         self.shader = None
-        self.textures = dict[TextureType, Texture2D]()
+        self.textures = dict[TextureType, Texture]()
         self.scalars = dict[ScalarType, float]()
         self.colors = dict[ColorType, ColorProperty]()
 
@@ -54,10 +54,10 @@ class Material():
     def get_scalar(self: Self, scalar_type: ScalarType) -> None:
         return self.scalars[scalar_type]
 
-    def set_texture(self: Self, tex_type: TextureType, texture: Texture2D) -> None:
+    def set_texture(self: Self, tex_type: TextureType, texture: Texture) -> None:
         self.textures[tex_type] = texture
 
-    def get_texture(self: Self, tex_type: TextureType) -> Texture2D:
+    def get_texture(self: Self, tex_type: TextureType) -> Texture:
         return self.textures[tex_type]
 
     def has_texture(self: Self, tex_type: TextureType) -> bool:
@@ -96,12 +96,12 @@ class Material():
 
     def __apply_texture(self: Self, texture_type: TextureType, index: int) -> None:
         if self.has_texture(texture_type):
-            gl.glActiveTexture(gl.GL_TEXTURE0 + index)
-            gl.glBindTexture(gl.GL_TEXTURE_2D, self.textures[texture_type].texture)
+            self.textures[texture_type].bind(index)
         else:
             gl.glActiveTexture(gl.GL_TEXTURE0 + index)
             gl.glBindTexture(gl.GL_TEXTURE_2D, asset_manager.get_asset("empty_tex").object.texture)
 
     def __apply_color(self: Self, color_type: ColorType) -> None:
-        color_property: ColorProperty = self.colors[color_type]
-        engine.gfx.uni_vec3(self.shader, color_property.name, color_property.value)
+        if color_type in self.colors:
+            color_property: ColorProperty = self.colors[color_type]
+            engine.gfx.uni_vec3(self.shader, color_property.name, color_property.value)
