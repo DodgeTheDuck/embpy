@@ -1,10 +1,10 @@
 import core.engine as engine
-from tests.engine_dev.app_state_dev import AppStateDev
+from tests.games.pong.pong import Pong
 
 
 def main() -> None:
 
-    appState: AppStateDev = AppStateDev()
+    appState = Pong()
 
     engine.init(appState)
     engine.run()

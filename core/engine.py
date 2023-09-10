@@ -64,12 +64,12 @@ def init(root_state: AppState) -> None:
     asset_manager.add_asset(AssetShader("skybox", "assets/shader/skybox.shader").load())
     asset_manager.add_asset(AssetTexture("empty_tex", "assets/textures/empty_tex.bmp").load())
 
-    asset_manager.add_asset(AssetTexture("sky_box_back", "assets/textures/skybox/back.jpg").load())
-    asset_manager.add_asset(AssetTexture("sky_box_front", "assets/textures/skybox/front.jpg").load())
-    asset_manager.add_asset(AssetTexture("sky_box_left", "assets/textures/skybox/left.jpg").load())
-    asset_manager.add_asset(AssetTexture("sky_box_right", "assets/textures/skybox/right.jpg").load())
-    asset_manager.add_asset(AssetTexture("sky_box_bottom", "assets/textures/skybox/bottom.jpg").load())
-    asset_manager.add_asset(AssetTexture("sky_box_top", "assets/textures/skybox/top.jpg").load())
+    # asset_manager.add_asset(AssetTexture("sky_box_back", "assets/textures/skybox/back.jpg").load())
+    # asset_manager.add_asset(AssetTexture("sky_box_front", "assets/textures/skybox/front.jpg").load())
+    # asset_manager.add_asset(AssetTexture("sky_box_left", "assets/textures/skybox/left.jpg").load())
+    # asset_manager.add_asset(AssetTexture("sky_box_right", "assets/textures/skybox/right.jpg").load())
+    # asset_manager.add_asset(AssetTexture("sky_box_bottom", "assets/textures/skybox/bottom.jpg").load())
+    # asset_manager.add_asset(AssetTexture("sky_box_top", "assets/textures/skybox/top.jpg").load())
 
     console.write_line("assets loaded")
 
@@ -123,8 +123,10 @@ def _draw(delta: int) -> None:
     """
 
     scene.light_manager.cache_lights()
+    scene.camera_manager.cache_cameras()
 
     gfx.get_active_pipeline().begin()
+    scene.camera_manager.apply_cameras()
 
     # run render pipeline
     while (gfx.get_active_pipeline().next()):
@@ -133,6 +135,7 @@ def _draw(delta: int) -> None:
         _app_states[-1].draw_pass(gfx.get_active_pipeline().get_active_stage_index())
         gfx.get_active_pipeline().get_active_stage().end_state()
 
+    scene.camera_manager.end_cameras()
     # finalise pipeline
     gfx.get_active_pipeline().end()
 

@@ -3,7 +3,8 @@ import time
 from typing import Self
 import glm
 from gfx.buffer_data import BufferData
-from gfx.material import Material, ColorType, TextureType, ScalarType
+from gfx.material import ColorType, TextureType
+from gfx.material_properties import MaterialProperties, ScalarType
 from gfx.texture_2d import Sampler, Texture2D
 from gfx.mesh import Mesh
 import pygltflib as gltf
@@ -13,7 +14,6 @@ from gfx.mesh_node import MeshNode
 from core.node_graph import NodeGraph, Node
 from gfx.transform import Transform
 import core.engine as engine
-import core.asset.asset_manager as asset_manager
 
 
 type_map = {
@@ -44,7 +44,8 @@ class GltfLoader:
             raise Exception(f"unsupported number of scenes in {self.filepath}")
 
         for scene in model.scenes:
-            self._traverse_node(model.nodes[scene.nodes[0]], buffers, model, mesh_tree, None)
+            for node in scene.nodes:
+                self._traverse_node(model.nodes[node], buffers, model, mesh_tree, mesh_tree.root)
 
         engine.console.write_line(f"finished loading GLTF in {time.time() - start_time}")
 
@@ -77,14 +78,14 @@ class GltfLoader:
                 binary_file.write(img_data)
             return Texture2D(img_data, sampler)
 
-    def _parse_material(self: Self, model: gltf.GLTF2, gltf_material: gltf.Material, buffers: list[bytes]) -> Material:
+    def _parse_material_properties(self: Self, model: gltf.GLTF2, gltf_material: gltf.Material, buffers: list[bytes]) -> MaterialProperties:
 
         if gltf_material is None:
             return None
 
         engine.console.write_line(f"loading material: {gltf_material.name}")
 
-        material: Material = Material()
+        material_properties = MaterialProperties()
         albedo: Texture2D = None
         albedo_color: glm.vec3 = glm.vec3(1, 1, 1)
         metallic_roughness: Texture2D = None
@@ -118,22 +119,18 @@ class GltfLoader:
                 metallic_roughness = self._parse_texture(model, gltf_roughness, buffers)
 
         if albedo:
-            material.set_texture(TextureType.albedo, albedo)
+            material_properties.set_texture(TextureType.albedo, albedo)
         if normal:
-            material.set_texture(TextureType.normal, normal)
+            material_properties.set_texture(TextureType.normal, normal)
         if metallic_roughness:
-            material.set_texture(TextureType.metallic_roughness, metallic_roughness)
+            material_properties.set_texture(TextureType.metallic_roughness, metallic_roughness)
 
-        material.set_scalar(ScalarType.metallic, metallic_factor)
-        material.set_scalar(ScalarType.roughness, roughness_factor)
+        material_properties.set_scalar(ScalarType.metallic, metallic_factor)
+        material_properties.set_scalar(ScalarType.roughness, roughness_factor)
 
-        material.add_color_property("albedo_col", ColorType.albedo, albedo_color)
+        material_properties.add_color_property("albedo_col", ColorType.albedo, albedo_color)
 
-        material.name = gltf_material.name
-
-        material.set_shader(asset_manager.instantiate_asset("basic_shading").object)
-
-        return material
+        return material_properties
 
     def _parse_primitive(self: Self, model: gltf.GLTF2, node: gltf.Node, primitive: gltf.Primitive, buffers: list[bytes]) -> Mesh:
 
@@ -172,7 +169,7 @@ class GltfLoader:
                     BufferData(buffers[0], gl.GL_ARRAY_BUFFER, attributes)],
                     ind_acc.count,
                     ind_acc.componentType,
-                    self._parse_material(model, material, buffers))
+                    self._parse_material_properties(model, material, buffers))
 
     def _traverse_node(self: Self, gltf_node: gltf.Node, buffers: list[bytes], model: gltf.GLTF2, mesh_tree: NodeGraph, parent_node: Node[MeshNode]) -> None:
 
@@ -198,7 +195,12 @@ class GltfLoader:
             if gltf_node.translation:
                 pos = glm.vec3(gltf_node.translation[0], gltf_node.translation[1], gltf_node.translation[2])
             if gltf_node.rotation:
-                rot = glm.vec3(gltf_node.rotation[0], gltf_node.rotation[1], gltf_node.rotation[2])
+                if len(gltf_node.rotation) == 4:
+                    rot = glm.eulerAngles(glm.quat(gltf_node.rotation[0], gltf_node.rotation[1], gltf_node.rotation[2], gltf_node.rotation[3]))
+                elif len(gltf_node.rotation) == 3:
+                    rot = glm.vec3(gltf_node.rotation[0], gltf_node.rotation[1], gltf_node.rotation[2])
+                else:
+                    raise Exception("unsupported gltf rotation components")
             if gltf_node.scale:
                 scale = glm.vec3(gltf_node.scale[0], gltf_node.scale[1], gltf_node.scale[2])
 

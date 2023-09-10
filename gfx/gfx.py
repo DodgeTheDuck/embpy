@@ -6,6 +6,7 @@ import core.engine as engine
 from typing import Self
 from pyparsing import deque
 from core.node_graph import Node, NodeGraph
+from gfx.material import Material
 from gfx.mesh_node import MeshNode
 from gfx.pipeline.pipeline import Pipeline
 from gfx.pipeline.pipeline_stage import PipelineStage
@@ -82,22 +83,27 @@ class Gfx:
     def set_pipeline(self: Self, pipeline: Pipeline) -> None:
         self.pipeline = pipeline
 
-    def draw_mesh_tree(self: Self, mesh_tree_root: NodeGraph[MeshNode]) -> None:
-        self.__draw_mesh_node(mesh_tree_root)
+    def draw_mesh_tree(self: Self, mesh_tree_root: NodeGraph[MeshNode], material: Material) -> None:
+        self.__draw_mesh_node(mesh_tree_root, material)
 
-    def __draw_mesh_node(self: Self, node: Node[MeshNode]) -> None:
-        self.push_mat_model(node.obj.transform.as_mat4())
-        for mesh in node.obj.meshes:
-            mesh.bind()
-            self.apply_mvp()
-            if mesh.do_lighting:
-                engine.scene.light_manager.apply_lights()
-            gl.glDrawElements(gl.GL_TRIANGLES,
-                              mesh.n_indices,
-                              mesh.index_type,
-                              None)
+    def __draw_mesh_node(self: Self, node: Node[MeshNode], material: Material) -> None:
+        if node.obj is not None:
+            self.push_mat_model(node.obj.transform.as_mat4())
+            for mesh in node.obj.meshes:
+                mesh.bind()
+                self.apply_mvp()
+                material.apply_properties(mesh.material_properties)
+                if mesh.do_lighting:
+                    engine.scene.light_manager.apply_lights()
+                gl.glDrawElements(gl.GL_TRIANGLES,
+                                  mesh.n_indices,
+                                  mesh.index_type,
+                                  None)
+        else:
+            self.push_mat_model(glm.mat4())
         for child in node.children:
-            self.__draw_mesh_node(child)
+            self.__draw_mesh_node(child, material)
+
         self.pop_mat_model()
 
 # region Wrapper Functions

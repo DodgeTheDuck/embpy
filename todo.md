@@ -1,0 +1,1 @@
+# TODO: Create mesh assets to stop loading them every time

@@ -12,6 +12,7 @@ def compile_shaders() -> None:
     sc.compile(["shaders/depth_shader.frag", "shaders/depth_shader.vert"], "assets/shader/depth_shader.shader")
     sc.compile(["shaders/albedo_only.frag", "shaders/albedo_only.vert"], "assets/shader/albedo_only.shader")
     sc.compile(["shaders/skybox.frag", "shaders/skybox.vert"], "assets/shader/skybox.shader")
+    sc.compile(["tests/games/pong/shaders/pong_post.frag", "tests/games/pong/shaders/pong_post.vert"], "assets/shader/pong_post.shader")
     pass
 
 

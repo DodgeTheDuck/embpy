@@ -1,6 +1,8 @@
 
 from typing import Self
 
+import glm
+
 from component.component import Component
 from scene.scene_object import SceneObject
 import imgui
@@ -12,6 +14,14 @@ class TransformComponent(Component):
     def __init__(self: Self, owner: SceneObject) -> None:
         self.transform: Transform = Transform()
         super().__init__(owner, "Transform")
+
+    def set_position(self: Self, position: glm.vec3) -> Self:
+        self.transform.position = position
+        return self
+
+    def translate(self: Self, translation: glm.vec3) -> Self:
+        self.transform.position += translation
+        return self
 
     def draw_gui(self: Self) -> None:
 

@@ -12,7 +12,8 @@ import core.engine as engine
 class ModelComponent(Component):
     def __init__(self: Self, owner: SceneObject) -> None:
         self.mesh_tree: NodeGraph[MeshNode] = None
-        self.shaded = True
+        self.lit = True
+        self.material: Material = None
         super().__init__(owner, "Model")
         pass
 
@@ -20,24 +21,33 @@ class ModelComponent(Component):
         self.mesh_tree = mesh_tree
         return self
 
+    def set_material(self: Self, material: Material) -> Self:
+        self.material = material
+        return self
+
     def tick(self: Self, delta: float) -> None:
         return super().tick(delta)
 
     def draw_pass(self: Self, pass_index: int) -> None:
+
+        if self.material is None:
+            raise Exception("No material bound to model")
+
         transform: TransformComponent = self.owner.get_component(TransformComponent)
         if transform is not None:
+            self.material.use()
             engine.gfx.push_mat_model(transform.transform.as_mat4())
-            engine.gfx.draw_mesh_tree(self.mesh_tree.root)
+            engine.gfx.draw_mesh_tree(self.mesh_tree.root, self.material)
             engine.gfx.pop_mat_model()
 
         return super().draw_pass(pass_index)
 
     def draw_gui(self: Self) -> None:
 
-        shaded_changed, shaded_val = imgui.checkbox("shaded", self.shaded)
+        shaded_changed, shaded_val = imgui.checkbox("shaded", self.lit)
 
         if shaded_changed:
-            self.shaded = shaded_val
+            self.lit = shaded_val
 
         if imgui.collapsing_header("Nodes")[0]:
             self._draw_node_gui(self.mesh_tree.root)

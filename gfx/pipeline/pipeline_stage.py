@@ -21,7 +21,7 @@ class PipelineStage:
         loader = GltfLoader("assets/models/rendering/plane/plane.glb")
         meshes = loader.load()
         self.default_shader = default_shader
-        self.mesh = meshes.root.obj.meshes[0]
+        self.mesh = meshes.root.children[0].obj.meshes[0]
         self.name = name
         self.fbo = FBO()
         self.state_begin: FunctionType = None
@@ -41,6 +41,23 @@ class PipelineStage:
 
     def get_default_shader(self: Self) -> ShaderProgram:
         return self.default_shader
+
+    def render(self: Self, input_stage: Self) -> None:
+        if self.default_shader is None:
+            raise Exception(f"No shader bound to pipeline stage {self.name}")
+        self.default_shader.use()
+        gl.glActiveTexture(gl.GL_TEXTURE0)
+        gl.glBindTexture(gl.GL_TEXTURE_2D, input_stage.get_attachment(0).texture)
+        gl.glActiveTexture(gl.GL_TEXTURE1)
+        gl.glBindTexture(gl.GL_TEXTURE_2D, input_stage.get_attachment(1).texture)
+
+        gl.glBindVertexArray(self.mesh.vao.buffer)
+        gl.glDisable(gl.GL_DEPTH_TEST)
+        gl.glDrawElements(gl.GL_TRIANGLES,
+                          self.mesh.n_indices,
+                          self.mesh.index_type,
+                          None)
+        gl.glEnable(gl.GL_DEPTH_TEST)
 
     def blit(self: Self) -> None:
         gl.glUseProgram(asset_manager.get_asset("fbo_blit").object.program)

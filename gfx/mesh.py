@@ -1,9 +1,7 @@
-import core.engine as engine
-
 from typing import Self
 from gfx.attribute import AttributeType
 from gfx.buffer_data import BufferData
-from gfx.material import Material
+from gfx.material_properties import MaterialProperties
 from gfx.vao import VAO
 from gfx.vbo import VBO
 
@@ -16,11 +14,11 @@ class Mesh:
                  buffer_data: list[BufferData],
                  n_indices: int,
                  index_type: int,
-                 material: Material) -> None:
+                 material_properties: MaterialProperties) -> None:
         self.vao = vao = VAO()
         self.n_indices = n_indices
         self.index_type = index_type
-        self.material = material
+        self.material_properties = material_properties
         self.do_lighting = True
         self.attribute_types: list[AttributeType] = list[AttributeType]()
         vao.bind()
@@ -37,9 +35,9 @@ class Mesh:
 
     def bind(self: Self) -> None:
         self.vao.bind()
-        self.material.apply()
-        if "has_tangents" in self.material.shader.uniforms:
-            if AttributeType.TANGENT not in self.attribute_types:
-                engine.gfx.uni_int1(self.material.shader, "has_tangents", 0)
-            else:
-                engine.gfx.uni_int1(self.material.shader, "has_tangents", 1)
+        # self.material.apply()
+        # if "has_tangents" in self.material.shader.uniforms:
+        #     if AttributeType.TANGENT not in self.attribute_types:
+        #         engine.gfx.uni_int1(self.material.shader, "has_tangents", 0)
+        #     else:
+        #         engine.gfx.uni_int1(self.material.shader, "has_tangents", 1)
