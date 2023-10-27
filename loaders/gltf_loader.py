@@ -81,7 +81,7 @@ class GltfLoader:
     def _parse_material_properties(self: Self, model: gltf.GLTF2, gltf_material: gltf.Material, buffers: list[bytes]) -> MaterialProperties:
 
         if gltf_material is None:
-            return None
+            return MaterialProperties.make_default()
 
         engine.console.write_line(f"loading material: {gltf_material.name}")
 

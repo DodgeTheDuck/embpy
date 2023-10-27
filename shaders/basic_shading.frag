@@ -25,7 +25,7 @@ struct Light {
 uniform Light lights[8];  // Up to 8 lights
 
 uniform vec3 cameraPosition;
-const float shininess = 32.0;
+const float shininess = 1.0;
 
 void main()
 {
@@ -38,7 +38,7 @@ void main()
 
     vec3 N = vec3(0.0, 0.0, 0.0);
 
-    if(has_tangents) {        
+    if(has_tangents) {      
         vec3 sampledNormal = texture(normal_map, tex_coords).rgb * 2.0 - 1.0;
         N = normalize(tbn * sampledNormal);
     } else {
@@ -62,7 +62,7 @@ void main()
         float specularFactor = pow(max(dot(normalDir, halfDir), 0.0), shininess);
 
         vec3 diffuse = lights[i].color * (diffuseFactor * lights[i].intensity);
-        vec3 specular = lights[i].color * (specularFactor * lights[i].intensity);
+        vec3 specular = vec3(0, 0, 0); //lights[i].color * (specularFactor * lights[i].intensity);
 
         // Attenuation calculation
         float distance = length(lights[i].position - frag_pos);

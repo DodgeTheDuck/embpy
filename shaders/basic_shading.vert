@@ -21,12 +21,12 @@ void main()
     vec4 world_pos = m * vec4(a_pos, 1.0);
     frag_pos = world_pos.xyz;
     tex_coords = a_tex_coords;
-    normal = a_normal;
 
     vec3 T = normalize(vec3(m * vec4(a_tangent,   0.0)));
     vec3 N = normalize(vec3(m * vec4(a_normal,    0.0)));
     vec3 B = normalize(vec3(m * vec4(cross(N, T), 0.0)));
 
+    normal = N;
     tbn = mat3(T, B, N);
 
     mat4 inverse_view = inverse(v);

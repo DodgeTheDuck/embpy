@@ -13,6 +13,7 @@ from core.app_state import AppState
 from core.interval_timer import CallbackInterval, Timer
 from gfx.gfx import Gfx
 from gfx.renderer_setup.renderer_setup_3d import RendererSetup3d
+from physics.physics_world import PhysicsWorld
 from scene.scene import Scene
 import core.asset.asset_manager as asset_manager
 import gui.gui as gui
@@ -23,6 +24,7 @@ import core.pg as pg
 
 console: Console = None
 scene: Scene = None
+world: PhysicsWorld = None
 gfx: Gfx = None
 
 # VARS: private
@@ -30,7 +32,9 @@ gfx: Gfx = None
 _app_states: deque[AppState] = deque[AppState]()
 _engine_timer: Timer = None
 _tick_interval: CallbackInterval = None
+_physics_tick_interval: CallbackInterval = None
 _draw_interval: CallbackInterval = None
+_draw_gui: bool = True
 
 
 def init(root_state: AppState) -> None:
@@ -40,7 +44,7 @@ def init(root_state: AppState) -> None:
     :param root_state: Bootstrapping app state.
     """
 
-    global _engine_timer, _tick_interval, _draw_interval, console, scene, gfx
+    global _engine_timer, _tick_interval, _physics_tick_interval, _draw_interval, console, scene, gfx, world
 
     console = Console()
     # init pygame
@@ -54,22 +58,17 @@ def init(root_state: AppState) -> None:
     console.write_line("initialising gfx complete")
 
     scene = Scene()
+    world = PhysicsWorld()
 
     # load assets NOTE: will be automated at some point
     console.write_line("loading assets...")
     asset_manager.add_asset(AssetShader("basic_shading", "assets/shader/basic_shading.shader").load())
+    asset_manager.add_asset(AssetShader("pong_scene", "assets/shader/pong_scene.shader").load())
     asset_manager.add_asset(AssetShader("fbo_blit", "assets/shader/fbo_blit.shader").load())
     asset_manager.add_asset(AssetShader("depth_shader", "assets/shader/depth_shader.shader").load())
     asset_manager.add_asset(AssetShader("albedo_only", "assets/shader/albedo_only.shader").load())
     asset_manager.add_asset(AssetShader("skybox", "assets/shader/skybox.shader").load())
     asset_manager.add_asset(AssetTexture("empty_tex", "assets/textures/empty_tex.bmp").load())
-
-    # asset_manager.add_asset(AssetTexture("sky_box_back", "assets/textures/skybox/back.jpg").load())
-    # asset_manager.add_asset(AssetTexture("sky_box_front", "assets/textures/skybox/front.jpg").load())
-    # asset_manager.add_asset(AssetTexture("sky_box_left", "assets/textures/skybox/left.jpg").load())
-    # asset_manager.add_asset(AssetTexture("sky_box_right", "assets/textures/skybox/right.jpg").load())
-    # asset_manager.add_asset(AssetTexture("sky_box_bottom", "assets/textures/skybox/bottom.jpg").load())
-    # asset_manager.add_asset(AssetTexture("sky_box_top", "assets/textures/skybox/top.jpg").load())
 
     console.write_line("assets loaded")
 
@@ -83,6 +82,9 @@ def init(root_state: AppState) -> None:
     _tick_interval = _engine_timer.set_interval(1.0 / config.TPS,
                                                 _tick,
                                                 "Tick")
+    _physics_tick_interval = _engine_timer.set_interval(1.0 / config.PPS,
+                                                        _physics_tick,
+                                                        "PhysicsTick")
     _draw_interval = _engine_timer.set_interval(1.0 / config.FPS,
                                                 _draw,
                                                 "Draw")
@@ -105,17 +107,28 @@ def run() -> None:
         _engine_timer.update()
 
 
-def _tick(delta: int) -> None:
+def _tick(delta: float) -> None:
     """
     Perform engine/app logic.
 
     :param delta: Time in seconds since last _tick call
     """
-
+    scene.tick(delta)
     _app_states[-1].tick(delta)
 
 
-def _draw(delta: int) -> None:
+def _physics_tick(delta: float) -> None:
+    """
+    Perform physics updates.
+
+    :param delta: Time in seconds since last _tick call
+    """
+    scene.physics_tick(delta)
+    world.physics_tick(delta)
+    _app_states[-1].physics_tick(delta)
+
+
+def _draw(delta: float) -> None:
     """
     Perform engine/app drawing.
 
@@ -139,14 +152,15 @@ def _draw(delta: int) -> None:
     # finalise pipeline
     gfx.get_active_pipeline().end()
 
-    # render GUI
-    gui.start_frame()
-    gui.menu()
-    console.draw_gui()
-    gfx.get_active_pipeline().draw_gui()
-    _app_states[-1].draw_gui()
-    asset_manager.draw_gui()
-    gui.render()
+    if _draw_gui:
+        # render GUI
+        gui.start_frame()
+        gui.menu()
+        console.draw_gui()
+        gfx.get_active_pipeline().draw_gui()
+        _app_states[-1].draw_gui()
+        asset_manager.draw_gui()
+        gui.render()
 
     # display current frame
     pg.swap_buffers()

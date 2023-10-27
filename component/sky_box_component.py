@@ -1,6 +1,5 @@
 import imgui
 import core.engine as engine
-import core.asset.asset_manager as asset_manager
 
 from component.transform_component import TransformComponent
 from gfx.cube_map import CubeMap
@@ -17,8 +16,8 @@ class SkyBoxComponent(Component):
     def __init__(self: Self, owner: SceneObject) -> None:
         self.mesh_tree: NodeGraph[MeshNode] = None
         self.cube_map: CubeMap = None
-        self.material = Material()
-        self.material.set_shader(asset_manager.instantiate_asset("skybox").object)
+        self.material = Material("skybox")
+        self.material.is_lit = False
         self.shaded = True
         super().__init__(owner, "Model")
         pass
@@ -29,10 +28,8 @@ class SkyBoxComponent(Component):
 
     # TODO: this is temp while i just try and get fookin skyboxes working
     def set_cube_map(self: Self, cube_map: CubeMap) -> Self:
-        self.material.set_texture(TextureType.albedo, cube_map)
         self.cube_map = cube_map
-        self.mesh_tree.root.obj.meshes[0].material = self.material
-        self.mesh_tree.root.obj.meshes[0].do_lighting = False
+        self.mesh_tree.root.children[0].obj.meshes[0].material_properties.set_texture(TextureType.albedo, cube_map)
         return self
 
     def tick(self: Self, delta: float) -> None:
@@ -43,7 +40,7 @@ class SkyBoxComponent(Component):
         transform: TransformComponent = self.owner.get_component(TransformComponent)
         if transform is not None:
             engine.gfx.push_mat_model(transform.transform.as_mat4())
-            engine.gfx.draw_mesh_tree(self.mesh_tree.root)
+            engine.gfx.draw_mesh_tree(self.mesh_tree.root, self.material)
             engine.gfx.pop_mat_model()
         engine.gfx.depth_function(GlConstants.gl_less)
         return super().draw_pass(pass_index)

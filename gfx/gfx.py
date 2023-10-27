@@ -93,7 +93,7 @@ class Gfx:
                 mesh.bind()
                 self.apply_mvp()
                 material.apply_properties(mesh.material_properties)
-                if mesh.do_lighting:
+                if material.is_lit:
                     engine.scene.light_manager.apply_lights()
                 gl.glDrawElements(gl.GL_TRIANGLES,
                                   mesh.n_indices,

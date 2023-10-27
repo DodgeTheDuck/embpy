@@ -1,5 +1,6 @@
 import glm
 import pygame
+from gfx.material import Material
 import gui.gui as gui
 import core.engine as engine
 
@@ -30,6 +31,7 @@ class AppStateDev(AppState):
         test_obj = SceneObject("test_object", SceneObjectType.ENTITY)
         mesh_c = ModelComponent(test_obj)
         mesh_c.set_mesh_tree(test_obj_mesh)
+        mesh_c.set_material(Material("basic_shading"))
         mesh_c.lit = True
 
         trans_c = TransformComponent(test_obj)
@@ -54,7 +56,9 @@ class AppStateDev(AppState):
 
         light_mesh_c = ModelComponent(light_obj)
         light_mesh_c.set_mesh_tree(test_light_mesh)
-        light_mesh_c.lit = False
+        light_mat = Material("albedo_only")
+        light_mat.is_lit = False
+        light_mesh_c.set_material(light_mat)
 
         light_obj.add_component(light_c).add_component(light_trans_c).add_component(light_mesh_c)
 

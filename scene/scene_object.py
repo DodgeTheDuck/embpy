@@ -25,11 +25,17 @@ class SceneObject():
     def init(self: Self) -> None:
         pass
 
-    def tick(self: Self, delta: int) -> None:
+    def tick(self: Self, delta: float) -> None:
         for component in self.components:
             component.tick(delta)
         for child in self.children:
             child.tick(delta)
+
+    def physics_tick(self: Self, delta: float) -> None:
+        for component in self.components:
+            component.physics_tick(delta)
+        for child in self.children:
+            child.physics_tick(delta)
 
     def draw_pass(self: Self, pass_index: int) -> None:
         for component in self.components:
@@ -48,6 +54,13 @@ class SceneObject():
             if isinstance(component, type):
                 return component
         return None
+
+    def get_components(self: Self, type: T) -> list[T]:
+        result = []
+        for component in self.components:
+            if isinstance(component, type):
+                result.append(component)
+        return result
 
     def add_component(self: Self, component: Component) -> Self:
         self.components.append(component)

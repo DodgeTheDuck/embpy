@@ -13,6 +13,7 @@ class RendererSetup3d(RendererSetup):
 
     def init_app(self: Self) -> None:
         engine.gfx.viewport(0, 0, config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
+        engine.gfx.clear_color(0.2, 0.2, 0.2)
         engine.gfx.enable(gl.GL_DEPTH_TEST)
         return super().init_app()
 

@@ -59,3 +59,8 @@ class MaterialProperties:
 
     def has_color_property(self: Self, col_type: ColorType) -> bool:
         return col_type in self.colors
+
+    def make_default() -> 'MaterialProperties':
+        props = MaterialProperties()
+        props.add_color_property("albedo_col", ColorType.albedo, glm.vec3(1, 1, 1))
+        return props

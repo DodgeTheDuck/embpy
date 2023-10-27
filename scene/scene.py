@@ -19,6 +19,9 @@ class Scene:
     def tick(self: Self, delta: float) -> None:
         self.graph.tick(delta)
 
+    def physics_tick(self: Self, delta: float) -> None:
+        self.graph.physics_tick(delta)
+
     def draw_pass(self: Self, pass_index: int) -> None:
         self.graph.draw_pass(pass_index)
 

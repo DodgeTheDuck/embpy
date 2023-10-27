@@ -12,5 +12,8 @@ class SceneGraph:
     def tick(self: Self, delta: float) -> None:
         self.root.tick(delta)
 
+    def physics_tick(self: Self, delta: float) -> None:
+        self.root.physics_tick(delta)
+
     def draw_pass(self: Self, pass_index: int) -> None:
         self.root.draw_pass(pass_index)

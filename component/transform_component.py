@@ -19,6 +19,10 @@ class TransformComponent(Component):
         self.transform.position = position
         return self
 
+    def set_scale(self: Self, scale: glm.vec3) -> Self:
+        self.transform.scale = scale
+        return self
+
     def translate(self: Self, translation: glm.vec3) -> Self:
         self.transform.position += translation
         return self

@@ -4,10 +4,10 @@ from component.transform_component import TransformComponent
 from typing import Self
 from core.app_state import AppState
 from core.asset.asset_shader import AssetShader
-from scene.obj_light import ObjLight
 from scene.scene_object import SceneObject, SceneObjectType
 from tests.games.pong.objects.ball import Ball
 from tests.games.pong.objects.paddle import Paddle
+from tests.games.pong.objects.wall import Wall
 from tests.games.pong.pipelines.pong_pipeline import PongPipeline
 
 import glm
@@ -27,8 +27,11 @@ class Pong(AppState):
 
         paddle_1 = Paddle("paddle_1")
         paddle_2 = Paddle("paddle_2")
+
+        wall_left = Wall("wall_left", glm.vec3(-30, 0, 0))
+        wall_right = Wall("wall_right", glm.vec3(30, 0, 0))
+
         ball = Ball("ball")
-        light_1 = ObjLight("light")
 
         camera_obj = SceneObject("camera", SceneObjectType.ENTITY)
         cam_c = (CameraComponent(camera_obj)
@@ -44,8 +47,9 @@ class Pong(AppState):
         (engine.scene.graph.root
          .add_child(paddle_1)
          .add_child(paddle_2)
+         .add_child(wall_left)
+         .add_child(wall_right)
          .add_child(ball)
-         .add_child(light_1)
          .add_child(camera_obj))
 
     def tick(self: Self, delta: int) -> None:

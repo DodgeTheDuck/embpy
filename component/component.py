@@ -15,6 +15,9 @@ class Component:
     def tick(self: Self, delta: float) -> None:
         pass
 
+    def physics_tick(self: Self, delta: float) -> None:
+        pass
+
     def draw_pass(self: Self, pass_index: int) -> None:
         pass
 

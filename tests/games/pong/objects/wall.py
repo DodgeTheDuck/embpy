@@ -8,20 +8,19 @@ from gfx.material_properties import ColorType
 from gfx.mesh_node import MeshNode
 from loaders.gltf_loader import GltfLoader
 from scene.scene_object import SceneObject, SceneObjectType
-from tests.games.pong.components.paddle_controller import PaddleController
 
 import glm
 
 
-class Paddle(SceneObject):
-    def __init__(self: Self, name: str) -> None:
+class Wall(SceneObject):
+    def __init__(self: Self, name: str, pos: glm.vec3) -> None:
         super().__init__(name, SceneObjectType.ENTITY)
 
         paddle_loader: GltfLoader = GltfLoader("assets/models/cube/cube.glb")
         paddle_mesh: NodeGraph[MeshNode] = paddle_loader.load()
 
         # TODO: make this less awful
-        paddle_mesh.root.children[0].obj.meshes[0].material_properties.colors[ColorType.albedo].value = glm.vec3(0, 0, 1)
+        paddle_mesh.root.children[0].obj.meshes[0].material_properties.colors[ColorType.albedo].value = glm.vec3(0.4, 0.4, 0.4)
 
         mesh_c = ModelComponent(self)
         mesh_c.set_mesh_tree(paddle_mesh)
@@ -29,8 +28,7 @@ class Paddle(SceneObject):
         mesh_c.lit = True
 
         trans_c = TransformComponent(self)
-        trans_c.transform.scale = glm.vec3(6, 0.8, 0.8)
+        trans_c.transform.scale = glm.vec3(0.2, 1, 30)
+        trans_c.transform.position = pos
 
-        controller_c = PaddleController(self)
-
-        self.add_component(mesh_c).add_component(trans_c).add_component(controller_c)
+        self.add_component(mesh_c).add_component(trans_c)

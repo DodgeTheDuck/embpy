@@ -1,10 +1,10 @@
 import core.engine as engine
-from tests.games.pong.pong import Pong
+from tests.physics.collision.collision_test import CollisionTest
 
 
 def main() -> None:
 
-    appState = Pong()
+    appState = CollisionTest()
 
     engine.init(appState)
     engine.run()

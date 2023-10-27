@@ -12,11 +12,15 @@ class AppState(ABC):
         pass
 
     @abstractmethod
-    def tick(self: Self, delta: int) -> None:
+    def tick(self: Self, delta: float) -> None:
         pass
 
     @abstractmethod
-    def draw_pass(self: Self, pass_index: int) -> None:
+    def physics_tick(self: Self, delta: float) -> None:
+        pass
+
+    @abstractmethod
+    def draw_pass(self: Self, pass_index: float) -> None:
         pass
 
     @abstractmethod

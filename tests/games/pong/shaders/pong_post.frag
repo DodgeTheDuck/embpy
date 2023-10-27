@@ -36,6 +36,7 @@ void main()
     far = 1000.0;
 
     vec3 diffuse = texture(input_albedo, tex_coords.xy).rgb;
+
     mat3 I;
     vec3 texel;    
     for (int i=0; i<3; i++) {
@@ -52,9 +53,11 @@ void main()
     float g = sqrt(pow(gx, 2.0)+pow(gy, 2.0));
     
     if(g < 0.1) {
-        discard;
+        frag_color = vec4(diffuse, 1);
+    } else {
+        frag_color = vec4(1, 1, 1, 1);
     }
 
-    frag_color = vec4(1, 1, 1, 1);
+    
 
 }

@@ -30,10 +30,18 @@ class CameraComponent(Component):
         self.offset = offset
         return self
 
+    def set_position(self: Self, position: glm.vec3) -> Self:
+        self.position = position
+        return self
+
     def look_at(self: Self, location: glm.vec3) -> Self:
         self.view_matrix = glm.lookAt(self.offset,
                                       location,
                                       glm.vec3(0, 1, 0))
+        return self
+
+    def set_is_free(self: Self, is_free: bool) -> Self:
+        self.is_free = is_free
         return self
 
     def tick(self: Self, delta: float) -> None:
