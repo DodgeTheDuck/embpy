@@ -12,6 +12,7 @@ from core.app_state import AppState
 from physics.solvers.solver_gravity import GravitySolver
 from tests.physics.collision.objects.ball import Ball
 from tests.physics.collision.objects.camera import Camera
+from tests.physics.collision.objects.floor import Floor
 from tests.physics.collision.objects.light import Light
 
 
@@ -22,26 +23,25 @@ class CollisionTest(AppState):
 
         engine.world.add_solver(GravitySolver(1))
 
-        ball_object_1 = Ball("test_ball_1").set_color(glm.vec3(0.05, 0.05, 0.7)).set_radius(0.5)
+        ball_object_1 = Ball("ball_1").set_color(glm.vec3(0.05, 0.05, 0.7)).set_radius(0.5)
         ball_object_1.get_component(TransformComponent).set_position(glm.vec3(0.2, 5, 0))
         ball_object_1.get_component(RigidBodyComponent).set_mass(1)
 
-        ball_object_2 = Ball("test_ball_2").set_color(glm.vec3(0.7, 0.05, 0.05)).set_radius(1.0)
-        ball_object_2.get_component(TransformComponent).set_position(glm.vec3(0, 0, 0))
-        ball_object_2.get_component(RigidBodyComponent).set_mass(0)
+        floor_object = Floor("floor")
+        floor_object.get_component(RigidBodyComponent).set_mass(0)
 
         light_object = Light("light")
-        light_object.get_component(TransformComponent).set_position(glm.vec3(0, 1, -10))
+        light_object.get_component(TransformComponent).set_position(glm.vec3(0, 30, -10))
 
         camera_object = Camera("camera")
         camera_object.get_component(CameraComponent).set_position(glm.vec3(0, 1, -5))
 
         engine.world.register_object(ball_object_1)
-        engine.world.register_object(ball_object_2)
+        engine.world.register_object(floor_object)
 
         (engine.scene.graph.root
          .add_child(ball_object_1)
-         .add_child(ball_object_2)
+         .add_child(floor_object)
          .add_child(light_object)
          .add_child(camera_object))
 
