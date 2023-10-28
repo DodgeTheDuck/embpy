@@ -3,6 +3,7 @@ from typing import Self
 
 import glm
 from component.rigid_body_component import RigidBodyComponent
+from component.transform_component import TransformComponent
 from physics.collision_tests import CollisionResult, CollisionTests
 from physics.solvers.solver import Solver
 
@@ -67,12 +68,32 @@ class PhysicsWorld:
 
     def resolve_collisions(self: Self, collisions: list[CollisionResult]) -> None:
         for collision in collisions:
-            # TODO: resolve collision for both objects (obj_a & obj_b)
-            # TODO: seperate objects here (objects shouldn't stay overlapped before resolving)
 
-            # resolve collision for obj_a
             rb_a = collision.obj_a.get_component(RigidBodyComponent)
-            rb_a.acceleration -= collision.hit_normal * glm.length(rb_a.velocity) * 0.9  # 0.9 is current hardcoded magic dampening number, add to rigid body?
+            trans_a = collision.obj_a.get_component(TransformComponent)
+            rb_b = collision.obj_b.get_component(RigidBodyComponent)
+            trans_b = collision.obj_b.get_component(TransformComponent)
+
+            relative_velocity = rb_b.velocity - rb_a.velocity
+
+            if rb_a.mass > 0 and rb_b.mass > 0:
+                sep_a = collision.penetration * (rb_b.mass / (rb_a.mass + rb_b.mass))
+                sep_b = collision.penetration * (rb_a.mass / (rb_a.mass + rb_b.mass))
+                trans_a.translate(collision.hit_normal * sep_a)
+                trans_b.translate(-collision.hit_normal * sep_b)
+                impulse_magnitude = glm.dot(relative_velocity, collision.hit_normal) / (1 / rb_a.mass + 1 / rb_b.mass)
+                rb_a.impulse(impulse_magnitude * collision.hit_normal * rb_a.get_restitution() * 2.0)
+                rb_b.impulse(-impulse_magnitude * collision.hit_normal * rb_b.get_restitution() * 2.0)
+            elif rb_a.mass > 0:
+                sep_a = collision.penetration
+                trans_a.translate(collision.hit_normal * sep_a)
+                impulse_magnitude = -2.0 * glm.dot(relative_velocity, collision.hit_normal) / (1 / rb_a.mass)
+                rb_a.impulse(-impulse_magnitude * collision.hit_normal * rb_a.get_restitution())
+            elif rb_b.mass > 0:
+                sep_b = collision.penetration
+                trans_b.translate(collision.hit_normal * sep_b)
+                impulse_magnitude = -2.0 * glm.dot(relative_velocity, collision.hit_normal) / (1 / rb_b.mass)
+                rb_b.impulse(impulse_magnitude * collision.hit_normal * rb_b.get_restitution())
 
     def add_solver(self: Self, solver: Solver) -> None:
         self.solvers.append(solver)

@@ -6,5 +6,5 @@ VIEW_FAR: float = 1000
 FOV: float = 90
 
 TPS: int = 128
-PPS: int = 64
+PPS: int = 256
 FPS: int = 256

@@ -43,11 +43,11 @@ class SceneObject():
         for child in self.children:
             child.draw_pass(pass_index)
 
-    def draw_pass_lighting(self: Self) -> None:
+    def draw_gui(self: Self) -> None:
         for component in self.components:
-            component.draw_pass_lighting()
+            component.draw_gui()
         for child in self.children:
-            child.draw_pass_lighting()
+            child.draw_gui()
 
     def get_component(self: Self, type: T) -> T:
         for component in self.components:

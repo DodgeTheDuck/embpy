@@ -1,3 +1,4 @@
+import random
 import glm
 import pygame
 from component.camera_component import CameraComponent
@@ -21,11 +22,36 @@ class CollisionTest(AppState):
 
         engine.gfx.set_pipeline(ForwardShadedPipeline())
 
-        engine.world.add_solver(GravitySolver(1))
+        engine.world.add_solver(GravitySolver(9.8))
 
-        ball_object_1 = Ball("ball_1").set_color(glm.vec3(0.05, 0.05, 0.7)).set_radius(0.5)
-        ball_object_1.get_component(TransformComponent).set_position(glm.vec3(0.2, 5, 0))
-        ball_object_1.get_component(RigidBodyComponent).set_mass(1)
+        # ball_1 = Ball("ball_1").set_color(glm.vec3(1, 0, 0)).set_radius(0.5)
+        # ball_1.get_component(TransformComponent).set_position(glm.vec3(0.2, 2, 0))
+        # ball_1.get_component(RigidBodyComponent).set_mass(64).set_restitution(0.8)
+        # engine.scene.graph.root.add_child(ball_1)
+        # engine.world.register_object(ball_1)
+
+        # ball_2 = Ball("ball_2").set_color(glm.vec3(0, 0, 1)).set_radius(0.5)
+        # ball_2.get_component(TransformComponent).set_position(glm.vec3(0, 0.6, 0))
+        # ball_2.get_component(RigidBodyComponent).set_mass(64).set_restitution(0.8)
+        # engine.scene.graph.root.add_child(ball_2)
+        # engine.world.register_object(ball_2)
+
+        # ball_2 = Ball(f"ball_1").set_color(glm.vec3(1, 0, 0)).set_radius(0.5)
+
+        for i in range(0, 10):
+            r = random.random()
+            g = random.random()
+            b = random.random()
+
+            x = 8 * random.random() - 4
+            y = 4 + 3 * random.random()
+            z = 8 * random.random() - 4
+
+            ball = Ball(f"ball_{i}").set_color(glm.vec3(r, g, b)).set_radius(0.5)
+            ball.get_component(TransformComponent).set_position(glm.vec3(x, y, z))
+            ball.get_component(RigidBodyComponent).set_mass(800).set_restitution(0.8)
+            engine.scene.graph.root.add_child(ball)
+            engine.world.register_object(ball)
 
         floor_object = Floor("floor")
         floor_object.get_component(RigidBodyComponent).set_mass(0)
@@ -36,11 +62,9 @@ class CollisionTest(AppState):
         camera_object = Camera("camera")
         camera_object.get_component(CameraComponent).set_position(glm.vec3(0, 1, -5))
 
-        engine.world.register_object(ball_object_1)
         engine.world.register_object(floor_object)
 
         (engine.scene.graph.root
-         .add_child(ball_object_1)
          .add_child(floor_object)
          .add_child(light_object)
          .add_child(camera_object))

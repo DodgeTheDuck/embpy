@@ -20,7 +20,7 @@ class Light(SceneObject):
         test_light_loader: GltfLoader = GltfLoader("assets/models/light_bulb/bulb.glb")
         test_light_mesh: NodeGraph[MeshNode] = test_light_loader.load()
         light_c = LightComponent(self)
-        light_c.set_color(glm.vec3(1, 1, 1)).set_intensity(32).set_attenuation(0.2).set_type(LightType.point)
+        light_c.set_color(glm.vec3(1, 1, 1)).set_intensity(64).set_attenuation(0.1).set_type(LightType.point)
 
         light_trans_c = TransformComponent(self)
         light_trans_c.transform.position = glm.vec3(0, 0, 0)

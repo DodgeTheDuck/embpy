@@ -25,6 +25,9 @@ class Scene:
     def draw_pass(self: Self, pass_index: int) -> None:
         self.graph.draw_pass(pass_index)
 
+    def draw_gui(self: Self) -> None:
+        self.graph.draw_gui()
+
     def get_from_component_type(self: Self, type: T) -> list[Component]:
         return self._get_from_component_type_recursive(self.graph.root, type, [])
 

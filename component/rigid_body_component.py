@@ -14,25 +14,27 @@ class RigidBodyComponent(Component):
         self.mass = 1
         self.acceleration = glm.vec3(0, 0, 0)
         self.velocity = glm.vec3(0, 0, 0)
-        self.dampening = 0
+        self.restitution = 0
 
-    def tick(self: Self, delta: float) -> None:
+    def physics_tick(self: Self, delta: float) -> None:
         transform: TransformComponent = self.owner.get_component(TransformComponent)
         if transform is not None:
-            self.velocity += self.acceleration
+            self.velocity += self.acceleration * delta
             transform.translate(self.velocity * delta)
             self.acceleration = glm.vec3(0, 0, 0)
         return super().tick(delta)
 
-    def set_mass(self: Self, mass: float) -> None:
-        self.mass = mass
+    def impulse(self: Self, force: glm.vec3) -> Self:
+        if self.mass != 0:
+            self.velocity += force / self.mass
 
-    # TODO: work out the maff to make this work in 3 dimensions
-    def impulse(self: Self, force: float, direction: glm.vec3) -> Self:
-        direction = glm.normalize(direction)
-        theta: float = atan2(direction.y, direction.x)
-        phi: float = atan2(direction.z, direction.x)
-        self.acceleration.x += glm.cos(theta) * force
-        self.acceleration.y += glm.sin(theta) * force
-        self.acceleration.z += glm.sin(phi) * force
+    def set_mass(self: Self, mass: float) -> Self:
+        self.mass = mass
+        return self
+
+    def get_restitution(self: Self) -> float:
+        return self.restitution
+
+    def set_restitution(self: Self, restitution: float) -> Self:
+        self.restitution = restitution
         return self

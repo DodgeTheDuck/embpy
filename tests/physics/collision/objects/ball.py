@@ -43,5 +43,8 @@ class Ball(SceneObject):
         hull_c.set_radius(radius)
         return self
 
+    def set_mass(self: Self, mass: float) -> Self:
+        self.mass = mass
+
     def tick(self: Self, delta: int) -> None:
         return super().tick(delta)

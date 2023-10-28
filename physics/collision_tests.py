@@ -15,6 +15,7 @@ class CollisionResult:
     obj_b: SceneObject = None
     hit_a: glm.vec3 = glm.vec3(0)
     hit_b: glm.vec3 = glm.vec3(0)
+    penetration: float = 0
     hit_normal: glm.vec3 = glm.vec3(0)
     is_hit: bool = False
 
@@ -78,8 +79,9 @@ class CollisionTests:
         if dist <= hull_a.radius + hull_b.radius:
             hit_a = trans_a.position + glm.normalize(trans_b.position - trans_a.position) * hull_a.radius
             hit_b = trans_b.position + glm.normalize(trans_a.position - trans_b.position) * hull_b.radius
-            normal = glm.normalize(hit_a - hit_b)
-            return CollisionResult(hit_a=hit_a, hit_b=hit_b, hit_normal=normal, is_hit=True, obj_a=obj_a, obj_b=obj_b)
+            normal = glm.normalize(hit_b - hit_a)
+            penetration = abs(glm.length(hit_b - hit_a))
+            return CollisionResult(hit_a=hit_a, hit_b=hit_b, hit_normal=normal, is_hit=True, obj_a=obj_a, obj_b=obj_b, penetration=penetration)
 
         # if no collision, return default 'no hit' result
         return CollisionResult()
@@ -97,8 +99,9 @@ class CollisionTests:
             # NOTE: i'm not sure how accurate this is
             hit_a = trans_a.position + glm.vec3(0, -hull_a.radius, 0)
             hit_b = hit_a
-            normal = glm.vec3(0, -1, 0)
-            return CollisionResult(hit_a=hit_a, hit_b=hit_b, hit_normal=normal, is_hit=True, obj_a=obj_a, obj_b=obj_b)
+            normal = glm.vec3(0, 1, 0)
+            penetration = abs((hull_b.height + trans_b.position.y) - hit_a.y)
+            return CollisionResult(hit_a=hit_a, hit_b=hit_b, hit_normal=normal, is_hit=True, obj_a=obj_a, obj_b=obj_b, penetration=penetration)
 
         # if no collision, return default 'no hit' result
         return CollisionResult()

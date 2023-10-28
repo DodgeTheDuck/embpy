@@ -18,7 +18,8 @@ class CameraComponent(Component):
         self.position = glm.vec3(0, 0, 0)
 
         self.is_free = False
-        self.free_move_speed = 30
+        self.free_move_speed = 2
+        self.free_look_speed = 60
 
         super().__init__(owner, "Camera")
 
@@ -50,13 +51,13 @@ class CameraComponent(Component):
             keys: list[int] = pygame.key.get_pressed()
 
             if keys[pygame.K_LEFT]:
-                self.yaw += 90 * delta
+                self.yaw += self.free_look_speed * delta
             if keys[pygame.K_RIGHT]:
-                self.yaw -= 90 * delta
+                self.yaw -= self.free_look_speed * delta
             if keys[pygame.K_UP]:
-                self.pitch += 90 * delta
+                self.pitch += self.free_look_speed * delta
             if keys[pygame.K_DOWN]:
-                self.pitch -= 90 * delta
+                self.pitch -= self.free_look_speed * delta
 
             if self.pitch > 89.0:
                 self.pitch = 89.0

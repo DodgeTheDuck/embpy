@@ -79,6 +79,8 @@ def _traverse_graph_node(obj: SceneObject) -> SceneObject:
 def scene_graph(graph: SceneGraph) -> SceneObject:
     imgui.begin("Scene Graph")
     _traverse_graph_node(graph.root)
+    draw_list = imgui.get_window_draw_list()
+    draw_list.add_line(20, 20, 64, 64, imgui.get_color_u32_rgba(255, 0, 0, 255), 3)
     imgui.end()
 
 

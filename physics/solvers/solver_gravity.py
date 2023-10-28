@@ -14,4 +14,5 @@ class GravitySolver(Solver):
     def solve(self: Self, obj: SceneObject, delta: float) -> None:
         rb = obj.get_component(RigidBodyComponent)
         if rb is not None:
-            rb.acceleration.y -= self.force * rb.mass * delta
+            if rb.mass > 0:
+                rb.acceleration.y -= self.force
